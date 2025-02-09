@@ -287,6 +287,7 @@
           speakBlastOff(); // Speak with rumble effect
           spaceshipContainer.style.bottom = '100vh'; // Launch spaceship
           setTimeout(() => {
+            sessionStorage.setItem("visited_takeoff", "true"); // Mark as visited
             window.location.href = 'th.html';
           }, 5000); // 5 seconds, matching the transition duration
         }
@@ -294,6 +295,8 @@
       }, 1000);
     });
 
+
+    
     // Ensure voices are loaded before selection
   window.speechSynthesis.onvoiceschanged = () => {
     getVoice("Grandpa (English (United States))");

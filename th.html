@@ -179,6 +179,11 @@
     </div>
 
     <script>
+
+        if (!sessionStorage.getItem("visited_takeoff")) {
+            alert("You must go through the previous page first!");
+            window.location.href = 'index.html';
+        }
         // Initialize clue visibility
         document.getElementById('clue1').classList.add('visible');
         let progress = 0;
@@ -221,6 +226,7 @@
 
         function revealFinal() {
             // Replace 'valentine-page.html' with the actual path to your Valentine's page
+            sessionStorage.setItem("visited_th", "true"); // Mark as visited
             window.location.href = 'vp.html';
         }
 

@@ -221,6 +221,10 @@
     </audio>
 
     <script>
+        if (!sessionStorage.getItem("visited_th")) {
+            alert("You must go through the previous page first!");
+            window.location.href = 'index.html';
+        }
         function updateTimer() {
             const now = new Date();
             const valentinesDay = new Date(now.getFullYear(), 1, 14);
