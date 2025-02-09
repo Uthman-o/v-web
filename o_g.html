@@ -5,26 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Valentine Games Collection</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            min-height: 100vh;
+            display: flex;
+            height: 100vh;
             margin: 0;
             background: linear-gradient(45deg, #ff758c, #ff7eb3);
             font-family: 'Arial', sans-serif;
         }
-
-        .layout-wrapper {
-            display: flex;
-            min-height: 100vh;
-            position: relative;
-            padding-bottom: 60px; /* Space for footer */
-        }
-
         .sidebar {
             width: 200px;
             background: rgba(255, 255, 255, 0.2);
@@ -33,10 +20,9 @@
             flex-direction: column;
             gap: 10px;
         }
-
         .sidebar button {
             padding: 10px;
-            font-size: clamp(14px, 2vw, 16px);
+            font-size: 16px;
             font-weight: bold;
             color: white;
             background: #ff3366;
@@ -44,69 +30,53 @@
             border-radius: 10px;
             cursor: pointer;
             transition: 0.3s;
-            white-space: nowrap;
         }
-
         .sidebar button:hover {
             background: #cc0033;
         }
-
         .container {
             flex: 1;
             text-align: center;
-            padding: 20px;
-            max-width: 100%;
         }
-
         h1 {
             color: white;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-            font-size: clamp(20px, 4vw, 32px);
-            margin-bottom: 20px;
         }
-
         .game-area {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 60vh;
+            height: 80vh;
         }
-
         .board {
             display: grid;
-            grid-template-columns: repeat(3, minmax(60px, 100px));
-            grid-template-rows: repeat(3, minmax(60px, 100px));
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
             gap: 10px;
             margin: 20px auto;
         }
-
         .cell {
-            width: 100%;
-            height: 100%;
+            width: 100px;
+            height: 100px;
             background-color: white;
             border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: clamp(24px, 8vw, 48px);
+            font-size: 48px;
             font-weight: bold;
             color: #ff3366;
             cursor: pointer;
-            aspect-ratio: 1;
         }
-
         #snake-canvas {
             background: white;
             border-radius: 15px;
-            max-width: 100%;
-            height: auto;
         }
-
         .restart-btn {
             margin-top: 20px;
             padding: 10px 20px;
-            font-size: clamp(14px, 2vw, 16px);
+            font-size: 16px;
             font-weight: bold;
             color: white;
             background: #ff3366;
@@ -114,97 +84,48 @@
             border-radius: 10px;
             cursor: pointer;
         }
-
+        .restart-btn:hover {
+            background: #cc0033;
+        }
         .coming-soon {
             color: white;
-            font-size: clamp(18px, 4vw, 24px);
+            font-size: 24px;
             font-weight: bold;
         }
-
         .footer {
-            position: absolute;
+            position: fixed;
             bottom: 0;
             width: 100%;
             background: rgba(255, 255, 255, 0.2);
             padding: 10px;
             text-align: center;
             color: white;
-            font-size: clamp(12px, 2vw, 14px);
+            font-size: 14px;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
         }
-
-        #winner-message {
-            color: white;
-            font-size: clamp(18px, 4vw, 24px);
-            font-weight: bold;
-            margin: 20px 0;
+        .footer span {
+            opacity: 0.8;
         }
-
-        /* Mobile Styles */
-        @media (max-width: 768px) {
-            .layout-wrapper {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                padding: 10px;
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .sidebar button {
-                flex: 1 1 calc(50% - 10px);
-                min-width: 140px;
-                font-size: 14px;
-            }
-
-            .container {
-                padding: 10px;
-            }
-
-            .board {
-                grid-template-columns: repeat(3, minmax(60px, 80px));
-                grid-template-rows: repeat(3, minmax(60px, 80px));
-            }
-
-            #snake-canvas {
-                width: 100%;
-                max-width: 300px;
-                height: auto;
-            }
-        }
-
-        /* Small Mobile Styles */
-        @media (max-width: 380px) {
-            .sidebar button {
-                flex: 1 1 100%;
-            }
-
-            .board {
-                grid-template-columns: repeat(3, minmax(50px, 70px));
-                grid-template-rows: repeat(3, minmax(50px, 70px));
-            }
+        .footer .separator {
+            margin: 0 10px;
+            opacity: 0.5;
         }
     </style>
 </head>
 <body>
-    <div class="layout-wrapper">
-        <div class="sidebar">
-            <button onclick="loadGame('tic-tac-toe')">Tic-Tac-Toe</button>
-            <button onclick="loadGame('snake-game')">Snake Game</button>
-            <button onclick="loadGame('rock-paper-scissors')">Rock, Paper, Scissors</button>
-            <button onclick="loadGame('memory-game')">Memory Game</button>
-        </div>
-        <div class="container">
-            <h1 id="game-title">❤️ Valentine Tic-Tac-Toe 💕</h1>
-            <div class="game-area" id="game-area"></div>
-            <p id="winner-message"></p>
-        </div>
+    <div class="sidebar">
+        <button onclick="loadGame('tic-tac-toe')">Tic-Tac-Toe</button>
+        <button onclick="loadGame('snake-game')">Snake Game</button>
+        <button onclick="loadGame('rock-paper-scissors')">Rock, Paper, Scissors</button>
+        <button onclick="loadGame('memory-game')">Memory Game</button>
+    </div>
+    <div class="container">
+        <h1 id="game-title">❤️ Valentine Tic-Tac-Toe 💕</h1>
+        <div class="game-area" id="game-area"></div>
+        <p id="winner-message" style="color: white; font-size: 24px; font-weight: bold;"></p>
     </div>
     <div class="footer">
-        <span>Netlify because I'm cheap</span>
+        <span>Netlfiy because I'm cheap</span>
         <span class="separator">|</span>
         <span>Contact Me: Please don't contact me</span>
     </div>

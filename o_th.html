@@ -14,26 +14,21 @@
             flex-direction: column;
             align-items: center;
             color: #333;
-            padding: 0 20px;
         }
         .container {
-            width: 100%;
             max-width: 800px;
             padding: 20px;
             text-align: center;
-            margin-bottom: 60px; /* Space for footer */
         }
         .clue-box {
             background: white;
             border-radius: 15px;
-            padding: clamp(15px, 4vw, 20px);
+            padding: 20px;
             margin: 20px 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             opacity: 0;
             transform: translateY(20px);
             transition: all 0.5s ease;
-            width: 100%;
-            box-sizing: border-box;
         }
         .clue-box.visible {
             opacity: 1;
@@ -41,18 +36,13 @@
         }
         .input-group {
             margin: 15px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
         }
         input {
             padding: 10px;
             border: 2px solid #ffb6c1;
             border-radius: 5px;
             margin: 5px;
-            font-size: clamp(14px, 3vw, 16px);
-            width: min(100%, 300px);
+            font-size: 16px;
         }
         button {
             padding: 10px 20px;
@@ -61,16 +51,15 @@
             border-radius: 5px;
             color: white;
             cursor: pointer;
-            font-size: clamp(14px, 3vw, 16px);
+            font-size: 16px;
             transition: background 0.3s ease;
-            width: min(100%, 200px);
         }
         button:hover {
             background: #ff1493;
         }
         .hint {
             color: #666;
-            font-size: clamp(12px, 2.5vw, 0.9em);
+            font-size: 0.9em;
             margin-top: 10px;
             display: none;
         }
@@ -90,7 +79,7 @@
         }
         .heart {
             color: #ff69b4;
-            font-size: clamp(20px, 5vw, 24px);
+            font-size: 24px;
             animation: pulse 1s infinite;
         }
         @keyframes pulse {
@@ -98,17 +87,7 @@
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-        h1 {
-            font-size: clamp(1.5rem, 5vw, 2.5rem);
-            margin: 20px 0;
-        }
-        h2 {
-            font-size: clamp(1.2rem, 4vw, 2rem);
-        }
-        p {
-            font-size: clamp(14px, 3vw, 16px);
-            line-height: 1.5;
-        }
+
         .footer {
             position: fixed;
             bottom: 0;
@@ -116,10 +95,9 @@
             background: rgba(255, 255, 255, 0.2);
             padding: 10px;
             text-align: center;
-            color: #333;
-            font-size: clamp(12px, 2.5vw, 14px);
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(5px);
+            color: white;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
         }
         .footer span {
             opacity: 0.8;
@@ -127,20 +105,6 @@
         .footer .separator {
             margin: 0 10px;
             opacity: 0.5;
-        }
-        @media (max-width: 480px) {
-            .input-group {
-                width: 100%;
-            }
-            .footer {
-                padding: 5px;
-            }
-            .footer span {
-                display: block;
-            }
-            .footer .separator {
-                display: none;
-            }
         }
     </style>
 </head>

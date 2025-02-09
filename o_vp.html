@@ -15,54 +15,41 @@
             overflow: hidden;
             position: relative;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         .container {
             background: rgba(255, 255, 255, 0.2);
-            padding: clamp(15px, 4vw, 20px);
+            padding: 20px;
             border-radius: 20px;
-            width: min(90%, 600px);
+            display: inline-block;
             box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.5);
             margin-top: 20px;
             animation: fadeIn 1.5s ease-in-out;
-            box-sizing: border-box;
         }
         h1 {
-            font-size: clamp(1.8rem, 6vw, 3rem);
+            font-size: 3rem;
             text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.8);
             animation: pulse 2s infinite alternate;
-            margin: clamp(10px, 3vw, 20px) 0;
         }
         .countdown {
-            font-size: clamp(1rem, 4vw, 1.5rem);
+            font-size: 1.5rem;
             font-weight: bold;
             margin: 10px 0;
         }
         .timer {
             display: inline-block;
-            padding: clamp(8px, 2vw, 10px) clamp(10px, 3vw, 15px);
+            padding: 10px 15px;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             margin: 10px 0;
-            font-size: clamp(0.9rem, 3vw, 1.2rem);
-        }
-        .buttons {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
         }
         .buttons button {
-            font-size: clamp(1.2rem, 4vw, 1.5rem);
-            padding: clamp(8px, 2vw, 10px) clamp(15px, 4vw, 20px);
-            margin: 5px;
+            font-size: 1.5rem;
+            padding: 10px 20px;
+            margin: 10px;
             border: none;
             border-radius: 10px;
             cursor: pointer;
             transition: 0.3s;
-            width: min(200px, 80%);
         }
         .yes {
             background-color: #ff4e50;
@@ -79,31 +66,47 @@
             position: absolute;
         }
         #loveMessage {
-            font-size: clamp(1rem, 3vw, 1.2rem);
+            font-size: 1.2rem;
             margin-top: 20px;
             display: none;
             animation: fadeIn 1s ease-in-out;
-            padding: 10px;
         }
-        #playMusicButton {
-            font-size: clamp(1rem, 3vw, 1.2rem);
-            padding: clamp(8px, 2vw, 10px) clamp(15px, 4vw, 20px);
-            margin-top: 10px;
-            border: none;
-            border-radius: 10px;
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-            transition: 0.3s;
-            width: min(200px, 80%);
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+        .heart {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            clip-path: path('M10,4 C10,4 8.5,2 5.5,2 C2.5,2 0,4.5 0,7.5 C0,12 10,18 10,18 C10,18 20,12 20,7.5 C20,4.5 17.5,2 14.5,2 C11.5,2 10,4 10,4');
+            opacity: 0.6;
+            bottom: -20px;
+            animation: float 10s linear;
+        }
+        @keyframes float {
+            0% { 
+                transform: translateY(0);
+                opacity: 0.6;
+            }
+            90% { opacity: 0.6; }
+            100% { 
+                transform: translateY(-120vh);
+                opacity: 0;
+            }
         }
         #secretButton {
             position: fixed;
-            bottom: 60px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            padding: clamp(10px, 3vw, 15px) clamp(20px, 5vw, 30px);
-            font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+            padding: 15px 30px;
+            font-size: 1.4rem;
             background: linear-gradient(45deg, #9c27b0, #673ab7);
             color: white;
             border: none;
@@ -113,7 +116,49 @@
             transition: all 0.5s ease;
             box-shadow: 0 0 20px rgba(156, 39, 176, 0.5);
             display: none;
-            width: min(300px, 90%);
+        }
+
+        #secretButton:hover {
+            transform: translateX(-50%) scale(1.1);
+            box-shadow: 0 0 30px rgba(156, 39, 176, 0.7);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
+        }
+
+        @keyframes float {
+            0% { 
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.8;
+            }
+            50% { transform: translateY(-60vh) rotate(180deg); }
+            100% { 
+                transform: translateY(-120vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* New CSS for the Play Music button */
+        #playMusicButton {
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            margin-top: 10px; /* Space below the Yes button */
+            border: none;
+            border-radius: 10px;
+            background-color: #4CAF50; /* Green color */
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        #playMusicButton:hover {
+            background-color: #45a049; /* Darker green on hover */
         }
         .footer {
             position: fixed;
@@ -122,20 +167,16 @@
             background: rgba(255, 255, 255, 0.2);
             padding: 10px;
             text-align: center;
-            font-size: clamp(12px, 2.5vw, 14px);
-            backdrop-filter: blur(5px);
+            color: white;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
         }
-        @media (max-width: 480px) {
-            .footer span {
-                display: block;
-            }
-            .footer .separator {
-                display: none;
-            }
-            .heart {
-                width: 15px;
-                height: 15px;
-            }
+        .footer span {
+            opacity: 0.8;
+        }
+        .footer .separator {
+            margin: 0 10px;
+            opacity: 0.5;
         }
     </style>
 </head>
