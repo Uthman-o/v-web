@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine?</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #ff9a9e, #fecfef);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 20px;
+            display: inline-block;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.5);
+            margin-top: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        h1 {
+            font-size: 3rem;
+            text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.8);
+            animation: pulse 2s infinite alternate;
+        }
+        .countdown {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .timer {
+            display: inline-block;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .buttons button {
+            font-size: 1.5rem;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .yes {
+            background-color: #ff4e50;
+            color: white;
+            box-shadow: 0 0 10px #ff4e50;
+        }
+        .yes:hover {
+            transform: scale(1.1);
+            background-color: #ff7676;
+        }
+        .no {
+            background-color: #ff4e50;
+            color: white;
+            position: absolute;
+        }
+        #loveMessage {
+            font-size: 1.2rem;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+        .heart {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            clip-path: path('M10,4 C10,4 8.5,2 5.5,2 C2.5,2 0,4.5 0,7.5 C0,12 10,18 10,18 C10,18 20,12 20,7.5 C20,4.5 17.5,2 14.5,2 C11.5,2 10,4 10,4');
+            opacity: 0.6;
+            bottom: -20px;
+            animation: float 10s linear;
+        }
+        @keyframes float {
+            0% { 
+                transform: translateY(0);
+                opacity: 0.6;
+            }
+            90% { opacity: 0.6; }
+            100% { 
+                transform: translateY(-120vh);
+                opacity: 0;
+            }
+        }
+        #secretButton {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            font-size: 1.4rem;
+            background: linear-gradient(45deg, #9c27b0, #673ab7);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.5s ease;
+            box-shadow: 0 0 20px rgba(156, 39, 176, 0.5);
+            display: none;
+        }
+
+        #secretButton:hover {
+            transform: translateX(-50%) scale(1.1);
+            box-shadow: 0 0 30px rgba(156, 39, 176, 0.7);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
+        }
+
+        @keyframes float {
+            0% { 
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.8;
+            }
+            50% { transform: translateY(-60vh) rotate(180deg); }
+            100% { 
+                transform: translateY(-120vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* New CSS for the Play Music button */
+        #playMusicButton {
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            margin-top: 10px; /* Space below the Yes button */
+            border: none;
+            border-radius: 10px;
+            background-color: #4CAF50; /* Green color */
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        #playMusicButton:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+    </style>
+</head>
+<body>
+    <h1>Will You Be My Valentine? 💖</h1>
+    <div class="countdown">
+        Time left until Valentine's Day:<br>
+        <div class="timer"><span id="timer">0 days 00:00:00</span></div>
+    </div>
+    <div class="container">
+        <div class="buttons">
+            <button class="yes" onclick="yesAnswer()">Yes 💝</button>
+            <button class="no" onmouseover="moveNoButton()">No 💔</button>
+        </div>
+    <!-- Move the Play Music button here, below the Yes button -->
+    <button id="playMusicButton" onclick="playBackgroundMusic()">Play Music 🎵</button>
+    </div>
+    
+    <div id="loveMessage">
+        <h2>You're My Everything! ❤️</h2>
+        <p>Every moment with you is pure magic! ✨</p>
+        <p>Even though we're miles apart, my heart is always with you.</p>
+    </div>
+
+    <button id="secretButton" onclick="window.location.href='4_game.html'">
+        Wow! You Found Me! 🎮
+    </button>
+
+    <!-- Add a "Play Music" button -->
+    <!-- <button id="playMusicButton" onclick="playBackgroundMusic()">Play Music 🎵</button> -->
+
+    <!-- Add the audio element for background music -->
+    <audio id="backgroundMusic" loop>
+        <source src="Seyi-Sodimu-Love-Me-Jeje.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        function updateTimer() {
+            const now = new Date();
+            const valentinesDay = new Date(now.getFullYear(), 1, 14);
+            
+            if (now > valentinesDay) {
+                valentinesDay.setFullYear(valentinesDay.getFullYear() + 1);
+            }
+            
+            const timeLeft = valentinesDay - now;
+            
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            const formattedTime = `${days} days ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById("timer").textContent = formattedTime;
+            
+            setTimeout(updateTimer, 1000);
+        }
+        
+        updateTimer();
+        
+        function yesAnswer() {
+            document.getElementById("loveMessage").style.display = "block";
+            confetti();
+            alert("Yay! ❤️ Sending you a virtual hug and lots of love! 💝");
+        }
+        
+        function moveNoButton() {
+            let button = document.querySelector('.no');
+            let x = Math.random() * (window.innerWidth - 100);
+            let y = Math.random() * (window.innerHeight - 50);
+            button.style.left = `${x}px`;
+            button.style.top = `${y}px`;
+        }
+        
+        function createHeart() {
+            let heart = document.createElement("div");
+            heart.className = "heart";
+            heart.style.left = Math.random() * 100 + "vw";
+            document.body.appendChild(heart);
+            setTimeout(() => { heart.remove(); }, 10000);
+        }
+        
+        setInterval(createHeart, 300);
+
+        // Function to play background music
+        function playBackgroundMusic() {
+            const audio = document.getElementById('backgroundMusic');
+            audio.play();
+            document.getElementById('playMusicButton').style.display = 'none'; // Hide the button after playing
+        }
+
+        // Show secret button after 1 minute
+        setTimeout(() => {
+            const secretButton = document.getElementById('secretButton');
+            secretButton.style.display = 'block';
+            setTimeout(() => {
+                secretButton.style.opacity = '1';
+            }, 100);
+        }, 60000);
+
+        // Simple confetti effect for "Yes" answer
+        function confetti() {
+            for (let i = 0; i < 75; i++) {
+                createConfetti();
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#ff4e50', '#fecfef', '#ff9a9e'];
+            const confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.width = '10px';
+            confetti.style.height = '10px';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.top = '-10px';
+            confetti.style.borderRadius = '50%';
+            confetti.style.animation = 'confettiFall 3s linear forwards';
+            document.body.appendChild(confetti);
+
+            setTimeout(() => confetti.remove(), 3000);
+        }
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes confettiFall {
+                0% { transform: translateY(0) rotate(0deg); }
+                100% { transform: translateY(100vh) rotate(720deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

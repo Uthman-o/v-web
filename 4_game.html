@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine Games Collection</title>
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(45deg, #ff758c, #ff7eb3);
+            font-family: 'Arial', sans-serif;
+        }
+        .sidebar {
+            width: 200px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .sidebar button {
+            padding: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background: #ff3366;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .sidebar button:hover {
+            background: #cc0033;
+        }
+        .container {
+            flex: 1;
+            text-align: center;
+        }
+        h1 {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            margin: 20px auto;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff3366;
+            cursor: pointer;
+        }
+        #snake-canvas {
+            background: white;
+            border-radius: 15px;
+        }
+        .restart-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background: #ff3366;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .restart-btn:hover {
+            background: #cc0033;
+        }
+        .coming-soon {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .footer span {
+            opacity: 0.8;
+        }
+        .footer .separator {
+            margin: 0 10px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <button onclick="loadGame('tic-tac-toe')">Tic-Tac-Toe</button>
+        <button onclick="loadGame('snake-game')">Snake Game</button>
+        <button onclick="loadGame('rock-paper-scissors')">Rock, Paper, Scissors</button>
+        <button onclick="loadGame('memory-game')">Memory Game</button>
+    </div>
+    <div class="container">
+        <h1 id="game-title">❤️ Valentine Tic-Tac-Toe 💕</h1>
+        <div class="game-area" id="game-area"></div>
+        <p id="winner-message" style="color: white; font-size: 24px; font-weight: bold;"></p>
+    </div>
+    <div class="footer">
+        <span>Github.io because I'm cheap</span>
+        <span class="separator">|</span>
+        <span>Contact Me: Please don't contact me</span>
+    </div>
+
+    <script>
+        // Global variables for Snake game
+        let snake, food, direction, gameLoop;
+        const GRID_SIZE = 20;
+        const GAME_SPEED = 100;
+
+        function loadGame(game) {
+            let gameArea = document.getElementById("game-area");
+            let gameTitle = document.getElementById("game-title");
+            let winnerMessage = document.getElementById("winner-message");
+            gameArea.innerHTML = "";
+            winnerMessage.innerText = "";
+
+            if (game === "tic-tac-toe") {
+                gameTitle.innerText = "❤️ Valentine Tic-Tac-Toe 💕";
+                gameArea.innerHTML = `
+                    <div class='board' id='board'></div>
+                    <button class="restart-btn" onclick="restartGame('tic-tac-toe')">Restart Game</button>
+                `;
+                createBoard();
+            } else if (game === "snake-game") {
+                gameTitle.innerText = "🐍 Snake Game ❤️";
+                gameArea.innerHTML = `
+                    <canvas id="snake-canvas" width="400" height="400"></canvas>
+                    <button class="restart-btn" onclick="restartGame('snake-game')">Restart Game</button>
+                `;
+                initSnakeGame();
+            } else {
+                gameTitle.innerText = `${game === 'rock-paper-scissors' ? '✊ Rock, Paper, Scissors ✋' : '🧠 Memory Game 💡'}`;
+                gameArea.innerHTML = `<p class="coming-soon">Coming Soon!</p>`;
+            }
+        }
+
+        // Tic-Tac-Toe Logic
+        let currentPlayer = "❤️";
+        let boardState = Array(9).fill(null);
+
+        function createBoard() {
+            let board = document.getElementById("board");
+            boardState = Array(9).fill(null);
+            currentPlayer = "❤️";
+            board.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.dataset.index = i;
+                cell.addEventListener("click", handleMove);
+                board.appendChild(cell);
+            }
+        }
+
+        function handleMove(event) {
+            let cell = event.target;
+            let index = cell.dataset.index;
+
+            if (!boardState[index] && !document.getElementById("winner-message").innerText) {
+                boardState[index] = currentPlayer;
+                cell.innerText = currentPlayer;
+                if (checkWinner()) {
+                    document.getElementById("winner-message").innerText = `${currentPlayer} Wins!`;
+                    return;
+                }
+                if (boardState.every(cell => cell !== null)) {
+                    document.getElementById("winner-message").innerText = "It's a Draw!";
+                    return;
+                }
+                currentPlayer = "💕";
+                setTimeout(aiMove, 500);
+            }
+        }
+
+        function aiMove() {
+            if (document.getElementById("winner-message").innerText) return;
+            
+            let bestScore = -Infinity;
+            let bestMove;
+            
+            for (let i = 0; i < 9; i++) {
+                if (boardState[i] === null) {
+                    boardState[i] = "💕";
+                    let score = minimax(boardState, 0, false);
+                    boardState[i] = null;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+            
+            boardState[bestMove] = "💕";
+            document.querySelector(`[data-index='${bestMove}']`).innerText = "💕";
+            
+            if (checkWinner()) {
+                document.getElementById("winner-message").innerText = `💕 Wins!`;
+            }
+            currentPlayer = "❤️";
+        }
+
+        function minimax(board, depth, isMaximizing) {
+            let result = checkWinner();
+            if (result) {
+                return isMaximizing ? -1 : 1;
+            }
+            if (board.every(cell => cell !== null)) {
+                return 0;
+            }
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === null) {
+                        board[i] = "💕";
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = null;
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === null) {
+                        board[i] = "❤️";
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = null;
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function checkWinner() {
+            const winningCombinations = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            return winningCombinations.some(combination => {
+                const [a, b, c] = combination;
+                return boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c];
+            });
+        }
+
+        // Snake Game Logic
+        function initSnakeGame() {
+            const canvas = document.getElementById('snake-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            snake = [
+                {x: 10, y: 10},
+                {x: 9, y: 10},
+                {x: 8, y: 10}
+            ];
+            
+            direction = 'right';
+            generateFood();
+            
+            document.addEventListener('keydown', changeDirection);
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(gameStep, GAME_SPEED);
+        }
+
+        function generateFood() {
+            food = {
+                x: Math.floor(Math.random() * (400/GRID_SIZE)),
+                y: Math.floor(Math.random() * (400/GRID_SIZE))
+            };
+            // Make sure food doesn't appear on snake
+            while (snake.some(segment => segment.x === food.x && segment.y === food.y)) {
+                food = {
+                    x: Math.floor(Math.random() * (400/GRID_SIZE)),
+                    y: Math.floor(Math.random() * (400/GRID_SIZE))
+                };
+            }
+        }
+
+        function changeDirection(event) {
+            const LEFT_KEY = 37;
+            const RIGHT_KEY = 39;
+            const UP_KEY = 38;
+            const DOWN_KEY = 40;
+
+            const keyPressed = event.keyCode;
+            const goingUp = direction === 'up';
+            const goingDown = direction === 'down';
+            const goingRight = direction === 'right';
+            const goingLeft = direction === 'left';
+
+            if (keyPressed === LEFT_KEY && !goingRight) direction = 'left';
+            if (keyPressed === UP_KEY && !goingDown) direction = 'up';
+            if (keyPressed === RIGHT_KEY && !goingLeft) direction = 'right';
+            if (keyPressed === DOWN_KEY && !goingUp) direction = 'down';
+        }
+
+        function gameStep() {
+            const canvas = document.getElementById('snake-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Move snake
+            const head = {x: snake[0].x, y: snake[0].y};
+            switch(direction) {
+                case 'right': head.x++; break;
+                case 'left': head.x--; break;
+                case 'up': head.y--; break;
+                case 'down': head.y++; break;
+            }
+
+            // Check collision with walls or self
+            if (head.x < 0 || head.x >= canvas.width/GRID_SIZE || 
+                head.y < 0 || head.y >= canvas.height/GRID_SIZE ||
+                snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                clearInterval(gameLoop);
+                document.getElementById("winner-message").innerText = "Game Over!";
+                return;
+            }
+
+            snake.unshift(head);
+
+            // Check if food is eaten
+            if (head.x === food.x && head.y === food.y) {
+                generateFood();
+            } else {
+                snake.pop();
+            }
+
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw snake in green
+            ctx.fillStyle = '#4CAF50';
+            snake.forEach(segment => {
+                ctx.fillRect(segment.x * GRID_SIZE, segment.y * GRID_SIZE, GRID_SIZE-2, GRID_SIZE-2);
+            });
+
+            // Draw heart food
+            ctx.fillStyle = '#ff3366';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('❤️', food.x * GRID_SIZE + GRID_SIZE/2, food.y * GRID_SIZE + GRID_SIZE/2);
+        }
+
+        function restartGame(game) {
+            if (game === 'tic-tac-toe') {
+                document.getElementById("winner-message").innerText = "";
+                createBoard();
+            } else if (game === 'snake-game') {
+                document.getElementById("winner-message").innerText = "";
+                initSnakeGame();
+            }
+        }
+
+        // Initialize with Tic-Tac-Toe
+        loadGame("tic-tac-toe");
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Adventure</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f6d1d1, #fff1f1);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+        }
+        .clue-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        .clue-box.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        input {
+            padding: 10px;
+            border: 2px solid #ffb6c1;
+            border-radius: 5px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #ff69b4;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #ff1493;
+        }
+        .hint {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: none;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #ffe4e1;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress {
+            width: 0%;
+            height: 100%;
+            background: #ff69b4;
+            transition: width 0.5s ease;
+        }
+        .heart {
+            color: #ff69b4;
+            font-size: 24px;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>A Special Adventure Awaits <span class="heart">♥</span></h1>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <div class="clue-box" id="clue1">
+            <h2>Clue #1</h2>
+            <p>I am the place where journeys begin,<br>
+                Unbrought gifts, awkward hugs, emotional goodbyes.<br>
+                When did we first meet? (MM/DD/YYYY)</p>
+            <div class="input-group">
+                <input type="text" id="answer1" placeholder="MM/DD/YYYY">
+                <button onclick="checkAnswer(1)">Submit</button>
+            </div>
+            <p class="hint" id="hint1">Hint: Remember that special day in the coffee shop...</p>
+        </div>
+
+        <div class="clue-box" id="clue2">
+            <h2>Clue #2</h2>
+            <p>The first tune you sent my way,<br>
+                A melody that brightened my day.<br>
+                What song began our musical ride?</p>
+            <div class="input-group">
+                <input type="text" id="answer2" placeholder="Enter first word">
+                <button onclick="checkAnswer(2)">Submit</button>
+            </div>
+            <p class="hint" id="hint2">Hint: I hate confrontation, it makes me uncomfortable...</p>
+        </div>
+
+        <div class="clue-box" id="clue3">
+            <h2>Clue #3</h2>
+            <p>Soft as silk, a gentle trace,<br>
+                Where my fingers love to embrace.<br>
+                What's my favorite part of you?</p>
+            <div class="input-group">
+                <input type="password" id="answer3" placeholder="Five letters">
+                <button onclick="checkAnswer(3)">Submit</button>
+            </div>
+            <p class="hint" id="hint3">Hint: Exactly what you think...</p>
+        </div>
+
+        <div class="clue-box" id="clue4">
+            <h2>Clue #4</h2>
+            <p>Cherry blossoms in the springtime air,<br>
+                Temples, sushi, lights everywhere.<br>
+                If dreams came true and money could flow,<br>
+                Where would we pack our bags to go?</p>
+            <div class="input-group">
+                <input type="text" id="answer4" placeholder="Five letters">
+                <button onclick="checkAnswer(4)">Submit</button>
+            </div>
+            <p class="hint" id="hint4">Hint: Remember our last therapy session 😂...</p>
+        </div>
+
+        <div class="clue-box" id="final">
+            <h2>🎉 You're Almost There! 🎉</h2>
+            <p>You've completed the treasure hunt!<br>
+               Now for your final destination...</p>
+            <button onclick="revealFinal()">Reveal Final Surprise</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize clue visibility
+        document.getElementById('clue1').classList.add('visible');
+        let progress = 0;
+        
+        // Store answers (these should be customized)
+        const answers = {
+            1: "12/26/2023",
+            2: "People",
+            3: "Boobs",
+            4: "Japan"
+        };
+
+        function updateProgress() {
+            progress += 25;
+            document.getElementById('progress').style.width = Math.min(progress, 100) + '%';
+        }
+
+        function showHint(number) {
+            document.getElementById(`hint${number}`).style.display = 'block';
+        }
+
+        function checkAnswer(number) {
+            const input = document.getElementById(`answer${number}`).value.toLowerCase().trim();
+            const correctAnswer = answers[number].toLowerCase();
+
+            if (input === correctAnswer) {
+                updateProgress();
+                document.getElementById(`clue${number}`).style.backgroundColor = '#e8f5e9';
+                
+                // Show next clue
+                if (number < 4) {
+                    document.getElementById(`clue${number + 1}`).classList.add('visible');
+                } else {
+                    document.getElementById('final').classList.add('visible');
+                }
+            } else {
+                showHint(number);
+            }
+        }
+
+        function revealFinal() {
+            // Replace 'valentine-page.html' with the actual path to your Valentine's page
+            window.location.href = '3_valentine_page.html';
+        }
+
+        // Add keyboard enter key support
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const clueNumber = this.id.replace('answer', '');
+                    checkAnswer(clueNumber);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
