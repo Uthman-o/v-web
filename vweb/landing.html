@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valentine Missions</title>
+
+  <style>
+    :root{
+      --bg-1: #2b0f1c;
+      --bg-2: #7a1f3d;
+      --bg-3: #f2c6b6;
+
+      --card-bg: rgba(255,255,255,0.14);
+      --card-border: rgba(255,255,255,0.25);
+
+      --btn-1: #8a1538;
+      --btn-2: #c93a6a;
+
+      --btn-hover-1: #a81d49;
+      --btn-hover-2: #e14b7d;
+
+      --text-main: #fff;
+      --text-sub: rgba(255,255,255,0.85);
+      --accent: #ffd6a5;
+    }
+
+    *{ box-sizing: border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top, var(--bg-3), transparent 40%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      color: var(--text-main);
+      padding: 24px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Flower pop background layer */
+    #flower-layer{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .flower{
+      position: absolute;
+      transform: translate(-50%, -50%) scale(0.2);
+      opacity: 0;
+      will-change: transform, opacity, filter;
+      animation: popZoomFade var(--dur) ease-out forwards;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.28));
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    @keyframes popZoomFade{
+      0%{
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.15);
+      }
+      12%{
+        opacity: 0.95;
+        transform: translate(-50%, -50%) scale(1.05);
+      }
+      30%{
+        opacity: 0.85;
+        transform: translate(-50%, -50%) scale(0.98);
+      }
+      100%{
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.55);
+      }
+    }
+
+    /* Your card sits above the flower layer */
+    .card{
+      position: relative;
+      z-index: 1;
+      width: min(720px, 94vw);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 26px;
+      padding: clamp(22px, 4vw, 32px);
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.35),
+        inset 0 0 0 1px rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    h1{
+      margin: 0 0 12px 0;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      letter-spacing: -0.02em;
+      text-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    }
+
+    p{
+      margin: 0 0 26px 0;
+      font-size: clamp(1rem, 2.8vw, 1.15rem);
+      line-height: 1.6;
+      color: var(--text-sub);
+    }
+
+    .grid{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    @media (min-width: 640px){
+      .grid{ grid-template-columns: 1fr 1fr; }
+    }
+
+    button{
+      width:100%;
+      border:none;
+      border-radius: 20px;
+      padding: 18px 16px;
+      cursor:pointer;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color:#fff;
+      background: linear-gradient(135deg, var(--btn-1), var(--btn-2));
+      box-shadow:
+        0 10px 25px rgba(0,0,0,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.25);
+      transition:
+        transform .15s ease,
+        box-shadow .2s ease,
+        background .25s ease;
+    }
+
+    button:hover{
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, var(--btn-hover-1), var(--btn-hover-2));
+      box-shadow:
+        0 16px 35px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+
+    .sub{
+      display:block;
+      margin-top:6px;
+      font-weight:500;
+      font-size:0.95rem;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+    }
+
+    .note{
+      margin-top: 22px;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    code{
+      background: rgba(0,0,0,0.25);
+      padding: 4px 8px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      color: #ffe9cf;
+    }
+
+    /* Reduce motion support */
+    @media (prefers-reduced-motion: reduce){
+      .flower{ animation: none; display: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="flower-layer" aria-hidden="true"></div>
+
+  <div class="card">
+    <h1>Choose your adventure 💘</h1>
+    <p>
+      Two moments. Two memories.  
+      Select which Valentine journey you want to relive.
+    </p>
+
+    <div class="grid">
+      <button id="go2025">
+        Valentine 2025
+        <span class="sub">The original mission</span>
+      </button>
+
+      <button id="go2026">
+        Valentine 2026
+        <span class="sub">A brand new chapter</span>
+      </button>
+    </div>
+
+    <!-- <div class="note">
+      Recommended structure: <code>/2025/</code> and <code>/2026/</code>
+    </div> -->
+  </div>
+
+  <script>
+    // Routing
+    document.getElementById("go2025").addEventListener("click", () => {
+      sessionStorage.clear();
+      window.location.href = "2025/index.html";
+    });
+
+    document.getElementById("go2026").addEventListener("click", () => {
+      sessionStorage.clear();
+      window.location.href = "2026/index.html";
+    });
+
+    // Flower pop background
+    const layer = document.getElementById("flower-layer");
+
+    // Emoji set: rose + lily-like bloom.
+    // True "lily" emoji support varies; 🌸 renders consistently across platforms.
+    const FLOWERS = ["🌹", "🌸"];
+
+    // Tune these
+    const SPAWN_EVERY_MS = 220;      // lower = more frequent
+    const MIN_SIZE = 18;            // px
+    const MAX_SIZE = 64;            // px
+    const MIN_DUR = 1400;           // ms
+    const MAX_DUR = 2600;           // ms
+
+    function rand(min, max){ return Math.random() * (max - min) + min; }
+
+    function spawnFlower(){
+      const el = document.createElement("div");
+      el.className = "flower";
+      el.textContent = FLOWERS[Math.floor(Math.random() * FLOWERS.length)];
+
+      const x = rand(0, window.innerWidth);
+      const y = rand(0, window.innerHeight);
+
+      const size = rand(MIN_SIZE, MAX_SIZE);
+      const dur = rand(MIN_DUR, MAX_DUR);
+
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+      el.style.fontSize = `${size}px`;
+      el.style.setProperty("--dur", `${dur}ms`);
+
+      // Slight hue variation so it feels alive (doesn't change your main palette)
+      const hue = rand(-12, 12);
+      el.style.filter = `hue-rotate(${hue}deg) drop-shadow(0 10px 18px rgba(0,0,0,0.28))`;
+
+      layer.appendChild(el);
+
+      // Cleanup after animation
+      window.setTimeout(() => el.remove(), dur + 50);
+    }
+
+    // Keep it from becoming too heavy on slow devices
+    let interval = window.setInterval(spawnFlower, SPAWN_EVERY_MS);
+
+    // Optional: pause when tab is hidden
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden){
+        clearInterval(interval);
+        interval = null;
+      } else {
+        if (!interval) interval = window.setInterval(spawnFlower, SPAWN_EVERY_MS);
+      }
+    });
+  </script>
+</body>
+</html>

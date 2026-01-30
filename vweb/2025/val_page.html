@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valentine Mission</title>
+
+  <style>
+    :root{
+      --bg-1:#160B14;
+      --bg-2:#2A0F1C;
+
+      --card: rgba(255,255,255,0.12);
+      --border: rgba(255,255,255,0.20);
+
+      --text:#F8F6F7;
+      --muted: rgba(248,246,247,0.72);
+
+      --btn1:#8A1538;
+      --btn2:#C93A6A;
+
+      --ghost: rgba(255,255,255,0.08);
+      --ghostBorder: rgba(255,255,255,0.14);
+
+      --ok:#3ddc97;
+      --bad:#ff6b6b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(900px 500px at 18% 12%, rgba(255,214,165,0.18), transparent 55%),
+        radial-gradient(900px 500px at 82% 78%, rgba(201,58,106,0.16), transparent 55%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 22px;
+      overflow:hidden;
+      position: relative;
+    }
+
+    /* Subtle floating particles */
+    #particleLayer{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      z-index: 0;
+      overflow:hidden;
+    }
+
+    .p{
+      position:absolute;
+      left: var(--x);
+      top: 110vh;
+      opacity: 0;
+      transform: translate(-50%, 0) scale(var(--s));
+      animation: floatUp var(--d) linear forwards;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.28));
+      user-select:none;
+      white-space: nowrap;
+    }
+
+    @keyframes floatUp{
+      0%   { opacity: 0; transform: translate(-50%, 0) scale(var(--s)); }
+      8%   { opacity: 0.70; }
+      100% { opacity: 0; transform: translate(-50%, -140vh) scale(calc(var(--s) * 1.15)); }
+    }
+
+    .shell{
+      width: min(950px, 96vw);
+      position: relative;
+      z-index: 1;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.06);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+
+    .topbar{
+      padding: clamp(16px, 2.5vw, 22px);
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent);
+    }
+
+    .title{
+      margin:0;
+      font-size: clamp(1.6rem, 3.2vw, 2.3rem);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .subtitle{
+      margin: 8px 0 0 0;
+      color: var(--muted);
+      font-size: clamp(0.95rem, 1.8vw, 1.05rem);
+      line-height: 1.45;
+    }
+
+    .badgeRow{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.90);
+      font-weight: 650;
+      white-space: nowrap;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .layout{
+      padding: clamp(18px, 3vw, 30px);
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .panel{
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.16);
+      border-radius: 22px;
+      padding: clamp(16px, 2.5vw, 22px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .question{
+      margin: 0;
+      font-size: clamp(1.35rem, 3vw, 2.0rem);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .hint{
+      margin: 10px 0 0 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.05rem);
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .ctaRow{
+      margin-top: 18px;
+      min-height: 170px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 14px;
+      flex-wrap:wrap;
+      position: relative;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .btn{
+      border:none;
+      cursor:pointer;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-weight: 850;
+      letter-spacing: -0.01em;
+      font-size: 1.05rem;
+      transition: transform 160ms ease, box-shadow 200ms ease, filter 200ms ease, background 200ms ease;
+      user-select:none;
+      white-space: nowrap;
+    }
+
+    .btnPrimary{
+      color: white;
+      background: linear-gradient(135deg, var(--btn1), var(--btn2));
+      box-shadow: 0 10px 26px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.22);
+      min-width: 180px;
+      position: relative;
+    }
+
+    #yesBtn{
+      min-width: 260px;
+      padding: 18px 30px;
+      font-size: 1.28rem;
+      border-radius: 22px;
+      box-shadow:
+        0 18px 40px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.28);
+    }
+
+    @keyframes yesPulse {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+    #yesBtn.pulse{ animation: yesPulse 1.35s ease-in-out infinite; }
+
+    @keyframes yesGlow {
+      0%   { box-shadow: 0 18px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.28), 0 0 0 rgba(201,58,106,0.0); }
+      50%  { box-shadow: 0 18px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.28), 0 0 26px rgba(201,58,106,0.35); }
+      100% { box-shadow: 0 18px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.28), 0 0 0 rgba(201,58,106,0.0); }
+    }
+    #yesBtn.glow{ animation: yesGlow 1.35s ease-in-out infinite; }
+
+    .btnGhost{
+      color: rgba(255,255,255,0.92);
+      background: var(--ghost);
+      border: 1px solid var(--ghostBorder);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+      min-width: 180px;
+    }
+
+    #noBtn{
+      position: absolute;
+      z-index: 3;
+      min-width: 160px;
+      transition: left 180ms ease, top 180ms ease, transform 180ms ease;
+    }
+
+    .row2{
+      display:flex;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top: 14px;
+    }
+
+    .mini{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .smallBtn{
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+
+    .toast{
+      display:none;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.92);
+      line-height: 1.4;
+      white-space: pre-line;
+      text-align: center;
+    }
+
+    .toast.ok{ border-color: rgba(61,220,151,0.35); background: rgba(61,220,151,0.10); }
+    .toast.bad{ border-color: rgba(255,107,107,0.35); background: rgba(255,107,107,0.10); }
+
+    /* HEART FIREWORKS OVERLAY */
+    #fwOverlay{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1000000;
+      display: none;
+      overflow: hidden;
+    }
+
+    #fwMsg{
+      position: fixed;
+      left: 50%;
+      top: 14%;
+      transform: translateX(-50%);
+      padding: 14px 18px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.48);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.94);
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      text-align:center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+      display:none;
+      white-space: nowrap;
+    }
+
+    .fwSpark{
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--c);
+      box-shadow: 0 0 18px var(--c);
+      opacity: 0.95;
+      transform: translate(0,0);
+      animation: fwFly var(--d) ease-out forwards;
+    }
+
+    @keyframes fwFly{
+      from{ transform: translate(0,0) scale(1); opacity: 1; }
+      to{ transform: translate(var(--x), var(--y)) scale(0.12); opacity: 0; }
+    }
+
+    .fwFlash{
+      position: fixed;
+      inset: 0;
+      background: white;
+      opacity: 0;
+      animation: fwFlash 220ms ease-out;
+    }
+    @keyframes fwFlash{
+      from{ opacity: 0.55; }
+      to{ opacity: 0; }
+    }
+
+    .fwShake{ animation: fwShake 350ms ease; }
+    @keyframes fwShake{
+      0%{ transform: translate(0,0); }
+      25%{ transform: translate(-5px, 3px); }
+      50%{ transform: translate(5px, -3px); }
+      75%{ transform: translate(-3px, 2px); }
+      100%{ transform: translate(0,0); }
+    }
+
+    /* Game button (hidden until 15s after YES) */
+    #gameWrap{
+      display:none;
+      margin-top: 16px;
+      text-align: center;
+    }
+    #gameBtn{
+      min-width: 260px;
+      padding: 16px 26px;
+      font-size: 1.15rem;
+      border-radius: 18px;
+      color: white;
+      background: linear-gradient(135deg, #2b7a4b, #3ddc97);
+      box-shadow: 0 16px 42px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.25);
+      font-weight: 900;
+      letter-spacing: -0.01em;
+    }
+    #gameBtn:hover{ transform: translateY(-2px); }
+
+    @media (prefers-reduced-motion: reduce){
+      .btn { transition: none; }
+      .p { animation: none; display:none; }
+      #noBtn { transition: none; }
+      #yesBtn.pulse, #yesBtn.glow { animation: none; }
+      .fwSpark { animation: none; display:none; }
+      .fwFlash { animation: none; display:none; }
+      .fwShake { animation: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="particleLayer" aria-hidden="true"></div>
+
+  <!-- FIREWORKS OVERLAY -->
+  <div id="fwOverlay" aria-hidden="true">
+    <div id="fwMsg">SHE SAID YES 💗</div>
+  </div>
+
+  <div class="shell" id="shell">
+    <div class="card">
+      <div class="topbar">
+        <div>
+          <h1 class="title">Final Question</h1>
+          <p class="subtitle">You made it. One last thing.</p>
+        </div>
+
+        <div class="badgeRow">
+          <div class="badge" id="timerBadge">⏳ --</div>
+          <div class="badge" id="musicBadge">🔈 Music: Off</div>
+        </div>
+      </div>
+
+      <div class="layout">
+        <div class="panel">
+          <p class="question">Will you be my Valentine?</p>
+          <p class="hint" id="subText">Choose wisely.</p>
+
+          <div class="ctaRow" id="ctaRow">
+            <button class="btn btnPrimary pulse glow" id="yesBtn" type="button">Yes</button>
+            <button class="btn btnGhost" id="noBtn" type="button">No</button>
+          </div>
+
+          <div class="row2">
+            <div class="mini">
+              <button class="btn btnGhost smallBtn" id="musicBtn" type="button">Play music</button>
+            </div>
+            <div class="mini">
+              <span style="color: var(--muted); font-size: 0.95rem;" id="triesText">Tip: try clicking “No”.</span>
+            </div>
+          </div>
+
+          <div class="toast" id="toast"></div>
+
+          <!-- SHOWS AFTER 15s FROM YES -->
+          <div id="gameWrap">
+            <button class="btn" id="gameBtn" type="button">🎮 Play the Game</button>
+            <div style="margin-top:8px;color:var(--muted);font-size:0.95rem;">Unlocked.</div>
+          </div>
+
+          <audio id="bgm" loop preload="auto" playsinline>
+            <source src="Seyi-Sodimu-Love-Me-Jeje.mp3" type="audio/mpeg" />
+          </audio>
+        </div>
+      </div>
+
+      <div class="footer">
+        <span>Valentine Mission • 2025</span>
+        <!-- <span>Next page unlocks after the game button appears.</span> -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Gate: must come from treasure hunt
+    if (!sessionStorage.getItem("visited_th")) {
+      alert("You must complete the treasure hunt first!");
+      window.location.href = "treasure_hunt.html";
+    }
+
+    // IMPORTANT: lock next page until game button is revealed + clicked
+    sessionStorage.removeItem("g_unlocked");
+
+    // -----------------------
+    // Countdown to Feb 14 (local time)
+    // -----------------------
+    const timerBadge = document.getElementById("timerBadge");
+    function nextValentines(){
+      const now = new Date();
+      const year = now.getFullYear();
+      let target = new Date(year, 1, 14, 0, 0, 0);
+      if (now > target) target = new Date(year + 1, 1, 14, 0, 0, 0);
+      return target;
+    }
+    const target = nextValentines();
+    const pad = (n) => String(n).padStart(2,"0");
+    function renderCountdown(){
+      const now = new Date();
+      let diff = target - now;
+      if (diff < 0) diff = 0;
+      const sec = Math.floor(diff / 1000);
+      const days = Math.floor(sec / 86400);
+      const hours = Math.floor((sec % 86400) / 3600);
+      const mins = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      timerBadge.textContent = `⏳ ${days}d ${pad(hours)}:${pad(mins)}:${pad(s)}`;
+    }
+    renderCountdown();
+    setInterval(renderCountdown, 250);
+
+    // -----------------------
+    // Toast
+    // -----------------------
+    const toast = document.getElementById("toast");
+    function showToast(kind, msg){
+      toast.style.display = "block";
+      toast.textContent = msg;
+      toast.classList.remove("ok","bad");
+      toast.classList.add(kind);
+    }
+
+    // -----------------------
+    // Music
+    // -----------------------
+    const bgm = document.getElementById("bgm");
+    const musicBtn = document.getElementById("musicBtn");
+    const musicBadge = document.getElementById("musicBadge");
+
+    function setMusicUI(on){
+      musicBadge.textContent = on ? "🔊 Music: On" : "🔈 Music: Off";
+      musicBtn.textContent = on ? "Pause music" : "Play music";
+    }
+
+    let musicOn = false;
+    setMusicUI(false);
+
+    bgm.addEventListener("error", () => {
+      showToast("bad", "Audio file not found / unsupported. Ensure the filename matches exactly and is in the same folder.");
+    });
+
+    musicBtn.addEventListener("click", async () => {
+      try{
+        if (!musicOn){
+          bgm.muted = false;
+          bgm.volume = 0.95;
+          bgm.load();
+          await bgm.play();
+          musicOn = true;
+          setMusicUI(true);
+          showToast("ok", "Music on.");
+        } else {
+          bgm.pause();
+          musicOn = false;
+          setMusicUI(false);
+          showToast("bad", "Music off.");
+        }
+      } catch (e){
+        showToast("bad",
+          "Music couldn't start.\n" +
+          "Checklist:\n" +
+          "1) Verify the mp3 filename matches EXACTLY.\n" +
+          "2) Ensure the tab isn't muted.\n" +
+          "3) Try a different browser if needed."
+        );
+      }
+    });
+
+    // -----------------------
+    // Particles
+    // -----------------------
+    const layer = document.getElementById("particleLayer");
+    const GLYPHS = ["🌹","🌸","✨","💗"];
+    const spawnEveryMs = 520;
+    function rand(min,max){ return Math.random()*(max-min)+min; }
+    function spawn(){
+      const el = document.createElement("div");
+      el.className = "p";
+      el.textContent = GLYPHS[Math.floor(Math.random()*GLYPHS.length)];
+      const x = rand(5, 95);
+      const s = rand(0.7, 1.4);
+      const d = rand(7000, 12000);
+      el.style.setProperty("--x", x + "vw");
+      el.style.setProperty("--s", s);
+      el.style.setProperty("--d", d + "ms");
+      el.style.filter = `hue-rotate(${rand(-14,14)}deg) drop-shadow(0 10px 18px rgba(0,0,0,0.28))`;
+      el.style.fontSize = (14 + 18*s) + "px";
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), d + 150);
+    }
+    let spawnInt = setInterval(spawn, spawnEveryMs);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden){
+        clearInterval(spawnInt);
+        spawnInt = null;
+      } else {
+        if (!spawnInt) spawnInt = setInterval(spawn, spawnEveryMs);
+      }
+    });
+
+    // -----------------------
+    // NO dodge + lock
+    // -----------------------
+    const ctaRow = document.getElementById("ctaRow");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const triesText = document.getElementById("triesText");
+
+    let noAttempts = 0;
+    const LOCK_AFTER = 12;
+
+    function moveNoInsideBox(){
+      const pad = 12;
+      const boxRect = ctaRow.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+      const maxX = boxRect.width  - btnRect.width  - pad;
+      const maxY = boxRect.height - btnRect.height - pad;
+      const x = Math.max(pad, Math.random() * maxX);
+      const y = Math.max(pad, Math.random() * maxY);
+      noBtn.style.left = x + "px";
+      noBtn.style.top  = y + "px";
+    }
+
+    function lockNo(){
+      noBtn.style.position = "static";
+      noBtn.style.left = "";
+      noBtn.style.top = "";
+      noBtn.style.transform = "";
+      noBtn.style.transition = "none";
+      noBtn.textContent = "Okay… fine 😒";
+      triesText.textContent = "You wore it down.";
+      showToast("ok", "Alright. You can click No now.");
+    }
+
+    requestAnimationFrame(() => moveNoInsideBox());
+
+    function onNoInteract(e){
+      if (noAttempts >= LOCK_AFTER) return;
+      e.preventDefault();
+      noAttempts++;
+      triesText.textContent = `Attempts: ${noAttempts}/${LOCK_AFTER}`;
+      moveNoInsideBox();
+      if (noAttempts >= LOCK_AFTER){
+        lockNo();
+      } else {
+        showToast("bad", "Nope.");
+      }
+    }
+
+    ["mouseenter","touchstart","click"].forEach(evt => {
+      noBtn.addEventListener(evt, onNoInteract, { passive: false });
+    });
+
+    window.addEventListener("resize", () => {
+      if (noAttempts < LOCK_AFTER) moveNoInsideBox();
+    });
+
+    noBtn.addEventListener("click", () => {
+      if (noAttempts >= LOCK_AFTER){
+        showToast("bad", "Wrong answer 😄");
+      }
+    });
+
+    // -----------------------
+    // HEART FIREWORKS OVERLAY (5s)
+    // -----------------------
+    const fwOverlay = document.getElementById("fwOverlay");
+    const fwMsg = document.getElementById("fwMsg");
+
+    function heartPoint(t){
+      const x = 16*Math.pow(Math.sin(t),3);
+      const y = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
+      return {x, y};
+    }
+
+    function spawnFwSpark(cx, cy, dx, dy, color, durMs){
+      const s = document.createElement("div");
+      s.className = "fwSpark";
+      s.style.left = cx + "px";
+      s.style.top  = cy + "px";
+      s.style.setProperty("--x", dx + "px");
+      s.style.setProperty("--y", dy + "px");
+      s.style.setProperty("--d", (durMs/1000) + "s");
+      s.style.setProperty("--c", color);
+      fwOverlay.appendChild(s);
+      setTimeout(()=>s.remove(), durMs + 120);
+    }
+
+    function heartBurst(cx, cy, scale=12, count=170){
+      const colors = ["#FFD6A5","#ff8fab","#ffe5ec","#C93A6A","#ffffff"];
+      for (let i=0;i<count;i++){
+        const t = (i / count) * Math.PI * 2;
+        const p = heartPoint(t);
+        const dx = p.x * scale + rand(-10,10);
+        const dy = -p.y * scale + rand(-10,10);
+        const c  = colors[Math.floor(Math.random()*colors.length)];
+        const d  = Math.floor(rand(900, 1500));
+        spawnFwSpark(cx, cy, dx, dy, c, d);
+      }
+      for (let k=0;k<55;k++){
+        const dx = rand(-100,100);
+        const dy = rand(-100,100);
+        const c  = colors[Math.floor(Math.random()*colors.length)];
+        const d  = Math.floor(rand(700, 1200));
+        spawnFwSpark(cx, cy, dx, dy, c, d);
+      }
+    }
+
+    function flashAndShake(){
+      document.body.classList.add("fwShake");
+      const f = document.createElement("div");
+      f.className = "fwFlash";
+      document.body.appendChild(f);
+      setTimeout(()=>f.remove(), 260);
+      setTimeout(()=>document.body.classList.remove("fwShake"), 380);
+    }
+
+    function megaHeartFireworks(durationMs=5000){
+      fwOverlay.style.display = "block";
+      fwMsg.style.display = "block";
+      fwMsg.textContent = "SHE SAID YES 💗";
+
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      const points = [
+        [w*0.50, h*0.52],
+        [w*0.25, h*0.35],
+        [w*0.75, h*0.35],
+        [w*0.25, h*0.75],
+        [w*0.75, h*0.75],
+      ];
+
+      let elapsed = 0;
+      const stepMs = 520;
+
+      const timer = setInterval(()=>{
+        const [x,y] = points[Math.floor(Math.random()*points.length)];
+        heartBurst(x, y, rand(10, 15), 170);
+        flashAndShake();
+        elapsed += stepMs;
+
+        if (elapsed >= durationMs){
+          clearInterval(timer);
+          setTimeout(()=>{
+            fwMsg.style.display = "none";
+            fwOverlay.style.display = "none";
+          }, 450);
+        }
+      }, stepMs);
+    }
+
+    // -----------------------
+    // YES: fireworks now + show game button at T+15s, only then allow g.html
+    // -----------------------
+    const gameWrap = document.getElementById("gameWrap");
+    const gameBtn  = document.getElementById("gameBtn");
+
+    let yesLocked = false;
+
+    yesBtn.addEventListener("click", async () => {
+      if (yesLocked) return;
+      yesLocked = true;
+
+      showToast("ok", "Correct. Celebration started…");
+      yesBtn.disabled = true;
+      noBtn.style.pointerEvents = "none"; // optional: freeze dodging during finale
+
+      // Try to start music automatically on YES click (still requires file exists)
+      try{
+        bgm.muted = false;
+        bgm.volume = 0.95;
+        await bgm.play();
+        musicOn = true;
+        setMusicUI(true);
+      } catch(e){ /* ignore */ }
+
+      // 5s heart fireworks
+      megaHeartFireworks(5000);
+
+      // After 15 seconds from YES click, reveal game button + unlock
+      setTimeout(() => {
+        gameWrap.style.display = "block";
+        sessionStorage.setItem("g_unlocked", "true"); // gate for g.html
+        showToast("ok", "Game unlocked. Use the button.");
+      }, 15000);
+    });
+
+    gameBtn.addEventListener("click", () => {
+      // Only proceed if unlocked
+      if (sessionStorage.getItem("g_unlocked") !== "true") return;
+      sessionStorage.setItem("visited_vp", "true");
+      window.location.href = "games.html";
+    });
+  </script>
+</body>
+</html>

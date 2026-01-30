@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spaceship Takeoff</title>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #000428, #004e92);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      position: relative;
+    }
+
+    #stars { position: absolute; inset: 0; z-index: 1; }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 2s infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    #countdown {
+      font-size: clamp(2rem, 8vw, 4rem);
+      z-index: 2;
+      font-weight: bold;
+      margin: 20px 0;
+      text-shadow: 0 0 10px rgba(255,255,255,0.7);
+    }
+
+    #spaceship-container {
+      position: absolute;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(250px, 70vw);
+      height: min(250px, 70vw);
+      transition: bottom 5s ease-in-out;
+      z-index: 2;
+    }
+
+    #spaceship {
+      width: 100%;
+      height: 100%;
+      background: url("spaceship.png") no-repeat center;
+      background-size: contain;
+    }
+
+    /* Engine visuals are hidden by default */
+    #smoke, #fire {
+      opacity: 0;
+      transform: translateX(-50%) scale(0.9);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+    }
+
+    #smoke {
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      width: 20%;
+      height: 20%;
+      background: radial-gradient(circle, rgba(255,255,255,0.7) 20%, transparent 80%);
+      animation: smoke 1.2s infinite;
+    }
+
+    @keyframes smoke {
+      from { transform: translateX(-50%) scale(1); opacity: 0.85; }
+      to   { transform: translateX(-50%) translateY(55px) scale(3); opacity: 0; }
+    }
+
+    #fire {
+      position: absolute;
+      bottom: -32%;
+      left: 50%;
+      width: 16%;
+      height: 32%;
+      background: radial-gradient(circle at top, #ff8c00, #ff4500);
+      clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%);
+      animation: fire 0.18s infinite;
+      filter: drop-shadow(0 6px 12px rgba(255, 140, 0, 0.35));
+    }
+
+    @keyframes fire {
+      0%   { transform: translateX(-50%) scaleY(1) skewX(0deg); filter: hue-rotate(0deg); }
+      25%  { transform: translateX(-50%) scaleY(1.25) skewX(4deg); filter: hue-rotate(10deg); }
+      50%  { transform: translateX(-50%) scaleY(1.1) skewX(-4deg); filter: hue-rotate(-10deg); }
+      75%  { transform: translateX(-50%) scaleY(1.35) skewX(4deg); filter: hue-rotate(10deg); }
+      100% { transform: translateX(-50%) scaleY(1) skewX(0deg); filter: hue-rotate(0deg); }
+    }
+
+    /* Enabled engine state */
+    .ignition #smoke,
+    .ignition #fire {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    #launchButton {
+      display: none;
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      background: #ff4500;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      z-index: 2;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    #launchButton:hover {
+      transform: scale(1.05);
+      background: #ff6b00;
+    }
+
+    #launchButton:disabled {
+      background: #666;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .text-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.85);
+      padding: 22px;
+      border-radius: 14px;
+      width: min(90%, 650px);
+      font-family: "Courier New", monospace;
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      z-index: 3;
+      display: none;
+      line-height: 1.45;
+      box-shadow: 0 0 20px rgba(255,255,255,0.25);
+    }
+
+    .next-button {
+      position: absolute;
+      bottom: -44px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #8a1538, #c93a6a);
+      border: none;
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 10px 26px;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow:
+        0 8px 20px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .next-button:hover {
+      transform: translateX(-50%) scale(1.06);
+      box-shadow:
+        0 12px 28px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #smoke { animation: none; }
+      #fire { animation: none; }
+      .star { animation: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="stars"></div>
+  <div id="countdown">10</div>
+
+  <button id="launchButton">Start Countdown</button>
+
+  <div id="spaceship-container">
+    <div id="spaceship"></div>
+    <div id="smoke"></div>
+    <div id="fire"></div>
+  </div>
+
+  <div id="textBox0" class="text-box">
+    They say, though I'm not sure who “they” are, that a romantic man is an unemployed man.
+    But to them, I say: welcome to my delightful bouts of unemployment.
+    <button id="next0" class="next-button">Proceed</button>
+  </div>
+
+  <div id="textBox1" class="text-box">
+    Greetings, Dulcinea. This is your captain — a.k.a. your boyfriend — speaking.<br><br>
+    As we prepare for the most extraordinary adventure of all, I want you to know that this website is not just a project,it's an expression of my love for you. 
+    <br><br>Every keystroke, every pixel, every line of code is a piece of my heart. 
+    <br><br>
+    Sit back, relax, and get ready to witness the launch of something truly magical, crafted just for you.
+    <button id="next1" class="next-button">Proceed</button>
+  </div>
+
+  <script>
+    const stars = document.getElementById("stars");
+    const textBox0 = document.getElementById("textBox0");
+    const textBox1 = document.getElementById("textBox1");
+    const launchButton = document.getElementById("launchButton");
+    const countdownEl = document.getElementById("countdown");
+    const ship = document.getElementById("spaceship-container");
+
+    // Star field
+    for (let i = 0; i < 400; i++) {
+      const s = document.createElement("div");
+      s.className = "star";
+      s.style.top = Math.random() * 100 + "%";
+      s.style.left = Math.random() * 100 + "%";
+      s.style.animationDuration = (Math.random() * 2 + 1) + "s";
+      stars.appendChild(s);
+    }
+
+    // Intro flow
+    textBox0.style.display = "block";
+
+    document.getElementById("next0").addEventListener("click", () => {
+      textBox0.style.display = "none";
+      textBox1.style.display = "block";
+    });
+
+    document.getElementById("next1").addEventListener("click", () => {
+      textBox1.style.display = "none";
+      launchButton.style.display = "inline-block";
+    });
+
+    // ---------- Audio: spoken countdown + rocket rumble (WebAudio) ----------
+    let audioCtx = null;
+    let master = null;
+    let compressor = null;
+
+    function ensureAudio() {
+      if (audioCtx) return true;
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return false;
+
+      audioCtx = new Ctx();
+
+      compressor = audioCtx.createDynamicsCompressor();
+      compressor.threshold.value = -28;
+      compressor.knee.value = 18;
+      compressor.ratio.value = 8;
+      compressor.attack.value = 0.003;
+      compressor.release.value = 0.12;
+
+      master = audioCtx.createGain();
+      master.gain.value = 0.65; // louder
+
+      compressor.connect(master);
+      master.connect(audioCtx.destination);
+      return true;
+    }
+
+    async function unlockAudioIfNeeded() {
+      if (!audioCtx) return;
+      if (audioCtx.state === "suspended") {
+        try { await audioCtx.resume(); } catch (_) {}
+      }
+    }
+
+    function tickBeep(freq = 880, dur = 0.06) {
+      if (!audioCtx || !compressor) return;
+      const now = audioCtx.currentTime;
+
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.value = freq;
+
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(0.45, now + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+      osc.connect(g);
+      g.connect(compressor);
+
+      osc.start(now);
+      osc.stop(now + dur + 0.02);
+    }
+
+    function rocketRumble(duration = 1.8) {
+      if (!audioCtx || !compressor) return;
+
+      const now = audioCtx.currentTime;
+      const end = now + duration;
+
+      // Noise buffer
+      const bufferSize = Math.floor(audioCtx.sampleRate * duration);
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.9;
+
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = "bandpass";
+      noiseFilter.frequency.setValueAtTime(110, now);
+      noiseFilter.Q.setValueAtTime(0.8, now);
+
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0.0001, now);
+      noiseGain.gain.exponentialRampToValueAtTime(1.0, now + 0.08);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, end);
+
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(compressor);
+
+      // Sub oscillators
+      const osc1 = audioCtx.createOscillator();
+      osc1.type = "sawtooth";
+      osc1.frequency.setValueAtTime(52, now);
+
+      const osc2 = audioCtx.createOscillator();
+      osc2.type = "sine";
+      osc2.frequency.setValueAtTime(34, now);
+
+      const lfo = audioCtx.createOscillator();
+      lfo.type = "sine";
+      lfo.frequency.setValueAtTime(6, now);
+
+      const lfoGain = audioCtx.createGain();
+      lfoGain.gain.setValueAtTime(6, now);
+
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc1.frequency);
+
+      const subFilter = audioCtx.createBiquadFilter();
+      subFilter.type = "lowpass";
+      subFilter.frequency.setValueAtTime(180, now);
+      subFilter.Q.setValueAtTime(0.7, now);
+
+      const subGain = audioCtx.createGain();
+      subGain.gain.setValueAtTime(0.0001, now);
+      subGain.gain.exponentialRampToValueAtTime(0.85, now + 0.08);
+      subGain.gain.exponentialRampToValueAtTime(0.0001, end);
+
+      osc1.connect(subFilter);
+      osc2.connect(subFilter);
+      subFilter.connect(subGain);
+      subGain.connect(compressor);
+
+      noise.start(now);
+      noise.stop(end + 0.02);
+
+      lfo.start(now);
+      lfo.stop(end + 0.02);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(end + 0.02);
+      osc2.stop(end + 0.02);
+    }
+
+    // -------- Spoken countdown (queue whole sequence) --------
+    function getVoicesSafe() {
+      try { return window.speechSynthesis.getVoices() || []; } catch { return []; }
+    }
+
+    async function waitForVoices(timeoutMs = 1200) {
+      if (!("speechSynthesis" in window)) return [];
+      let voices = getVoicesSafe();
+      if (voices.length) return voices;
+
+      return await new Promise((resolve) => {
+        let done = false;
+
+        const finish = () => {
+          if (done) return;
+          done = true;
+          window.speechSynthesis.onvoiceschanged = null;
+          resolve(getVoicesSafe());
+        };
+
+        window.speechSynthesis.onvoiceschanged = finish;
+        setTimeout(finish, timeoutMs);
+      });
+    }
+
+    function pickEnglishVoice(voices) {
+      if (!voices || !voices.length) return null;
+      return voices.find(v => (v.lang || "").toLowerCase().startsWith("en-us"))
+          || voices.find(v => (v.lang || "").toLowerCase().startsWith("en"))
+          || voices[0]
+          || null;
+    }
+
+    async function speakQueuedCountdown() {
+      if (!("speechSynthesis" in window)) return false;
+
+      try { window.speechSynthesis.resume(); } catch (_) {}
+
+      const voices = await waitForVoices();
+      const voice = pickEnglishVoice(voices);
+
+      try { window.speechSynthesis.cancel(); } catch (_) {}
+
+      for (let n = 10; n >= 1; n--) {
+        const u = new SpeechSynthesisUtterance(String(n));
+        if (voice) u.voice = voice;
+        u.rate = 1.0;
+        u.pitch = 1.0;
+        u.volume = 1.0;
+        window.speechSynthesis.speak(u);
+      }
+
+      const blast = new SpeechSynthesisUtterance("Blast off!");
+      if (voice) blast.voice = voice;
+      blast.rate = 0.75;
+      blast.pitch = 0.55;
+      blast.volume = 1.0;
+      window.speechSynthesis.speak(blast);
+
+      return true;
+    }
+
+    // ---------- Countdown + ignition choreography ----------
+    let running = false;
+
+    function setIgnition(on) {
+      if (on) ship.classList.add("ignition");
+      else ship.classList.remove("ignition");
+    }
+
+    launchButton.addEventListener("click", async () => {
+      if (running) return;
+      running = true;
+
+      ensureAudio();
+      await unlockAudioIfNeeded();
+
+      setIgnition(true);
+
+      // Start spoken countdown (queued). If blocked, beeps still work.
+      speakQueuedCountdown();
+
+      launchButton.disabled = true;
+      launchButton.style.display = "none";
+
+      let t = 10;
+      countdownEl.textContent = String(t);
+
+      // small cue beep (optional)
+      tickBeep(880, 0.06);
+
+      const timer = setInterval(async () => {
+        await unlockAudioIfNeeded();
+
+        t--;
+        countdownEl.textContent = String(t);
+
+        if (t > 0) {
+          tickBeep(t <= 3 ? 1100 : 880, 0.06);
+
+          if (t === 3) {
+            setIgnition(false);
+            setTimeout(() => setIgnition(true), 90);
+          }
+          return;
+        }
+
+        clearInterval(timer);
+
+        // Blast moment: rumble + thump
+        tickBeep(220, 0.12);
+        rocketRumble(1.8);
+
+        requestAnimationFrame(() => {
+          ship.style.bottom = "100vh";
+        });
+
+        setTimeout(() => {
+          sessionStorage.setItem("visited_takeoff", "true");
+          window.location.href = "treasure_hunt.html";
+        }, 5000);
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valentine Games Collection</title>
+
+  <style>
+    :root{
+      --bg-1:#160B14;
+      --bg-2:#2A0F1C;
+
+      --card: rgba(255,255,255,0.12);
+      --border: rgba(255,255,255,0.20);
+
+      --text:#F8F6F7;
+      --muted: rgba(248,246,247,0.72);
+
+      --btn1:#8A1538;
+      --btn2:#C93A6A;
+
+      --ghost: rgba(255,255,255,0.08);
+      --ghostBorder: rgba(255,255,255,0.14);
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+
+    body{
+      min-height:100vh;
+      margin:0;
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(900px 500px at 18% 12%, rgba(255,214,165,0.18), transparent 55%),
+        radial-gradient(900px 500px at 82% 78%, rgba(201,58,106,0.16), transparent 55%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      overflow-x:hidden;
+    }
+
+    .layout-wrapper{
+      display:flex;
+      min-height:100vh;
+      position:relative;
+      padding-bottom: 64px; /* footer space */
+    }
+
+    .sidebar{
+      width: 240px;
+      padding: 18px;
+      border-right: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      backdrop-filter: blur(10px);
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+
+    .sidebar button{
+      padding: 12px 12px;
+      font-size: 0.98rem;
+      font-weight: 850;
+      color: rgba(255,255,255,0.92);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 14px;
+      cursor:pointer;
+      transition: transform 160ms ease, filter 180ms ease, background 180ms ease;
+      white-space: nowrap;
+    }
+
+    .sidebar button:hover{
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      background: rgba(255,255,255,0.10);
+    }
+
+    .sidebar button.active{
+      background: linear-gradient(135deg, var(--btn1), var(--btn2));
+      border-color: rgba(255,255,255,0.18);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+      color: #fff;
+    }
+
+    .container{
+      flex: 1;
+      padding: 22px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+    }
+
+    .card{
+      width: min(920px, 98%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.06);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+
+    .topbar{
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+    }
+
+    h1{
+      font-size: clamp(1.25rem, 3.5vw, 2rem);
+      letter-spacing:-0.02em;
+      line-height:1.1;
+      margin:0;
+    }
+
+    .sub{
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.98rem;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.90);
+      font-weight: 650;
+      white-space: nowrap;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .content{
+      padding: 18px 20px 22px;
+      text-align:center;
+    }
+
+    .game-area{
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      min-height: 56vh;
+    }
+
+    .board{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(70px, 110px));
+      grid-template-rows: repeat(3, minmax(70px, 110px));
+      gap: 12px;
+      margin: 18px auto 10px;
+    }
+
+    .cell{
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.92);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: clamp(28px, 7vw, 54px);
+      font-weight: 900;
+      color: #b3184c;
+      cursor:pointer;
+      box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+      user-select:none;
+    }
+
+    #snake-canvas{
+      background: rgba(255,255,255,0.92);
+      border-radius: 18px;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.25);
+      max-width: 100%;
+      height: auto;
+    }
+
+    .restart-btn{
+      margin-top: 14px;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 900;
+      color: white;
+      background: linear-gradient(135deg, var(--btn1), var(--btn2));
+      border: none;
+      border-radius: 14px;
+      cursor:pointer;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.22);
+      transition: transform 160ms ease, filter 180ms ease;
+    }
+
+    .restart-btn:hover{
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .coming-soon{
+      color: rgba(255,255,255,0.92);
+      font-size: clamp(1.05rem, 3vw, 1.35rem);
+      font-weight: 900;
+    }
+
+    #winner-message{
+      color: rgba(255,255,255,0.92);
+      font-size: clamp(1.05rem, 3vw, 1.35rem);
+      font-weight: 900;
+      margin: 12px 0 0;
+      min-height: 1.6em;
+      text-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    }
+
+    .footer{
+      position:absolute;
+      bottom:0;
+      width:100%;
+      padding: 12px 16px;
+      text-align:center;
+      color: rgba(255,255,255,0.70);
+      font-size: 0.92rem;
+      background: rgba(0,0,0,0.18);
+      border-top: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+    }
+
+    /* Mobile */
+    @media (max-width: 860px){
+      .layout-wrapper{ flex-direction: column; }
+      .sidebar{
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.12);
+      }
+      .sidebar button{
+        flex: 1 1 calc(50% - 10px);
+        min-width: 160px;
+      }
+      .container{ padding: 14px; }
+      .board{
+        grid-template-columns: repeat(3, minmax(62px, 92px));
+        grid-template-rows: repeat(3, minmax(62px, 92px));
+      }
+      #snake-canvas{ width: 100%; max-width: 360px; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .sidebar button, .restart-btn{ transition:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout-wrapper">
+    <div class="sidebar" id="sidebar">
+      <button data-game="tic-tac-toe" onclick="loadGame('tic-tac-toe')">Tic-Tac-Toe</button>
+      <button data-game="snake-game" onclick="loadGame('snake-game')">Snake Game</button>
+      <button data-game="rock-paper-scissors" onclick="loadGame('rock-paper-scissors')">Rock / Paper / Scissors</button>
+      <button data-game="memory-game" onclick="loadGame('memory-game')">Memory Game</button>
+    </div>
+
+    <div class="container">
+      <div class="card">
+        <div class="topbar">
+          <div>
+            <h1 id="game-title">❤️ Valentine Tic-Tac-Toe 💕</h1>
+            <!-- <div class="sub">Pick a game on the left.</div> -->
+          </div>
+          <div class="badge" id="gateBadge">🔒 Locked</div>
+        </div>
+
+        <div class="content">
+          <div class="game-area" id="game-area"></div>
+          <p id="winner-message"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Valentine Games • 2025
+    </div>
+  </div>
+
+  <script>
+    // ===================== HARD GATE =====================
+    // Must have unlocked on vp.html AFTER the 15s reveal.
+    if (sessionStorage.getItem("g_unlocked") !== "true") {
+      alert("Finish the ask page first 🙂");
+      window.location.href = "vp.html";
+    }
+
+    // Mark access OK
+    const gateBadge = document.getElementById("gateBadge");
+    gateBadge.textContent = "✅ Unlocked";
+
+    // ===================== GAME NAV UI =====================
+    function setActiveButton(game){
+      document.querySelectorAll("#sidebar button").forEach(b=>{
+        b.classList.toggle("active", b.dataset.game === game);
+      });
+    }
+
+    // ===================== GLOBALS =====================
+    let activeGame = "tic-tac-toe";
+
+    // Snake globals
+    let snake = [];
+    let food = {x:0,y:0};
+    let direction = "right";
+    let gameLoop = null;
+
+    const GRID_SIZE = 20;
+    const CANVAS_SIZE = 400;
+    const GAME_SPEED = 100;
+
+    // Key handler only once (prevents stacking)
+    document.addEventListener("keydown", (event) => {
+      if (activeGame !== "snake-game") return;
+
+      const LEFT = 37, UP = 38, RIGHT = 39, DOWN = 40;
+      const k = event.keyCode;
+
+      const goingUp = direction === "up";
+      const goingDown = direction === "down";
+      const goingRight = direction === "right";
+      const goingLeft = direction === "left";
+
+      if (k === LEFT && !goingRight) direction = "left";
+      if (k === UP && !goingDown) direction = "up";
+      if (k === RIGHT && !goingLeft) direction = "right";
+      if (k === DOWN && !goingUp) direction = "down";
+    });
+
+    // ===================== LOAD GAME =====================
+    function loadGame(game){
+      activeGame = game;
+      setActiveButton(game);
+
+      const gameArea = document.getElementById("game-area");
+      const gameTitle = document.getElementById("game-title");
+      const winnerMessage = document.getElementById("winner-message");
+
+      gameArea.innerHTML = "";
+      winnerMessage.innerText = "";
+
+      if (gameLoop) { clearInterval(gameLoop); gameLoop = null; }
+
+      if (game === "tic-tac-toe") {
+        gameTitle.innerText = "❤️ Valentine Tic-Tac-Toe 💕";
+        gameArea.innerHTML = `
+          <div class="board" id="board"></div>
+          <button class="restart-btn" onclick="restartGame('tic-tac-toe')">Restart Game</button>
+        `;
+        createBoard();
+        return;
+      }
+
+      if (game === "snake-game") {
+        gameTitle.innerText = "🐍 Snake Game ❤️";
+        gameArea.innerHTML = `
+          <canvas id="snake-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}"></canvas>
+          <button class="restart-btn" onclick="restartGame('snake-game')">Restart Game</button>
+        `;
+        initSnakeGame();
+        return;
+      }
+
+      gameTitle.innerText = game === "rock-paper-scissors"
+        ? "✊ Rock, Paper, Scissors ✋"
+        : "🧠 Memory Game 💡";
+
+      gameArea.innerHTML = `<p class="coming-soon">Coming Soon!</p>`;
+    }
+
+    // ===================== TIC-TAC-TOE =====================
+    let currentPlayer = "❤️";
+    let boardState = Array(9).fill(null);
+
+    function createBoard(){
+      const board = document.getElementById("board");
+      boardState = Array(9).fill(null);
+      currentPlayer = "❤️";
+      board.innerHTML = "";
+
+      for (let i=0;i<9;i++){
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.dataset.index = i;
+        cell.addEventListener("click", handleMove);
+        board.appendChild(cell);
+      }
+    }
+
+    function handleMove(event){
+      const cell = event.target;
+      const index = Number(cell.dataset.index);
+      const winnerMessage = document.getElementById("winner-message");
+
+      if (boardState[index] || winnerMessage.innerText) return;
+
+      boardState[index] = currentPlayer;
+      cell.innerText = currentPlayer;
+
+      if (checkWinner()){
+        winnerMessage.innerText = `${currentPlayer} Wins!`;
+        return;
+      }
+
+      if (boardState.every(v => v !== null)){
+        winnerMessage.innerText = "It's a Draw!";
+        return;
+      }
+
+      currentPlayer = "💕";
+      setTimeout(aiMove, 350);
+    }
+
+    function aiMove(){
+      const winnerMessage = document.getElementById("winner-message");
+      if (winnerMessage.innerText) return;
+
+      let bestScore = -Infinity;
+      let bestMove = null;
+
+      for (let i=0;i<9;i++){
+        if (boardState[i] === null){
+          boardState[i] = "💕";
+          const score = minimax(boardState, 0, false);
+          boardState[i] = null;
+          if (score > bestScore){
+            bestScore = score;
+            bestMove = i;
+          }
+        }
+      }
+
+      if (bestMove === null) return;
+
+      boardState[bestMove] = "💕";
+      const el = document.querySelector(`[data-index='${bestMove}']`);
+      if (el) el.innerText = "💕";
+
+      if (checkWinner()){
+        winnerMessage.innerText = "💕 Wins!";
+        return;
+      }
+
+      if (boardState.every(v => v !== null)){
+        winnerMessage.innerText = "It's a Draw!";
+        return;
+      }
+
+      currentPlayer = "❤️";
+    }
+
+    function minimax(board, depth, isMaximizing){
+      const winner = checkWinnerOn(board);
+      if (winner) return isMaximizing ? -1 : 1;
+      if (board.every(v => v !== null)) return 0;
+
+      if (isMaximizing){
+        let best = -Infinity;
+        for (let i=0;i<9;i++){
+          if (board[i] === null){
+            board[i] = "💕";
+            best = Math.max(best, minimax(board, depth+1, false));
+            board[i] = null;
+          }
+        }
+        return best;
+      } else {
+        let best = Infinity;
+        for (let i=0;i<9;i++){
+          if (board[i] === null){
+            board[i] = "❤️";
+            best = Math.min(best, minimax(board, depth+1, true));
+            board[i] = null;
+          }
+        }
+        return best;
+      }
+    }
+
+    function checkWinner(){
+      return checkWinnerOn(boardState);
+    }
+
+    function checkWinnerOn(state){
+      const wins = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      for (const [a,b,c] of wins){
+        if (state[a] && state[a] === state[b] && state[a] === state[c]) return state[a];
+      }
+      return null;
+    }
+
+    // ===================== SNAKE =====================
+    function initSnakeGame(){
+      const canvas = document.getElementById("snake-canvas");
+      const ctx = canvas.getContext("2d");
+
+      snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+      direction = "right";
+      generateFood();
+
+      if (gameLoop) clearInterval(gameLoop);
+      gameLoop = setInterval(gameStep, GAME_SPEED);
+
+      // draw immediately
+      drawSnakeFrame(ctx, canvas);
+    }
+
+    function generateFood(){
+      const max = CANVAS_SIZE / GRID_SIZE;
+      food = { x: Math.floor(Math.random()*max), y: Math.floor(Math.random()*max) };
+
+      while (snake.some(seg => seg.x === food.x && seg.y === food.y)){
+        food = { x: Math.floor(Math.random()*max), y: Math.floor(Math.random()*max) };
+      }
+    }
+
+    function gameStep(){
+      const canvas = document.getElementById("snake-canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+
+      const head = { x: snake[0].x, y: snake[0].y };
+      if (direction === "right") head.x++;
+      if (direction === "left") head.x--;
+      if (direction === "up") head.y--;
+      if (direction === "down") head.y++;
+
+      const max = canvas.width / GRID_SIZE;
+      const hitWall = head.x < 0 || head.x >= max || head.y < 0 || head.y >= max;
+      const hitSelf = snake.some(seg => seg.x === head.x && seg.y === head.y);
+
+      if (hitWall || hitSelf){
+        clearInterval(gameLoop);
+        gameLoop = null;
+        document.getElementById("winner-message").innerText = "Game Over!";
+        return;
+      }
+
+      snake.unshift(head);
+
+      if (head.x === food.x && head.y === food.y){
+        generateFood();
+      } else {
+        snake.pop();
+      }
+
+      drawSnakeFrame(ctx, canvas);
+    }
+
+    function drawSnakeFrame(ctx, canvas){
+      ctx.fillStyle = "rgba(255,255,255,0.92)";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      // snake
+      ctx.fillStyle = "#2b7a4b";
+      snake.forEach(seg => {
+        ctx.fillRect(seg.x*GRID_SIZE, seg.y*GRID_SIZE, GRID_SIZE-2, GRID_SIZE-2);
+      });
+
+      // heart food
+      ctx.font = "20px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("❤️", food.x*GRID_SIZE + GRID_SIZE/2, food.y*GRID_SIZE + GRID_SIZE/2);
+    }
+
+    // ===================== RESTART =====================
+    function restartGame(game){
+      document.getElementById("winner-message").innerText = "";
+      if (game === "tic-tac-toe") createBoard();
+      if (game === "snake-game") initSnakeGame();
+    }
+
+    // ===================== INIT =====================
+    loadGame("tic-tac-toe");
+  </script>
+</body>
+</html>

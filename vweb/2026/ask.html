@@ -1,0 +1,434 @@
+<!-- =========================
+     ask.html (PASSWORD GATE with SHA-256)
+     - Uses WebCrypto if available, else pure-JS SHA-256 fallback
+     - IMPORTANT: Set STORED_HASH below
+     ========================= -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Access Required — Valentine Finder</title>
+  <style>
+    :root{
+      --bg0:#02110B; --bg1:#052217;
+      --emerald:#1FD18C; --text:#EFFFF7; --muted:rgba(239,255,247,.72);
+      --border: rgba(239,255,247,.14); --shadow: 0 18px 60px rgba(0,0,0,.42);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 70% 25%, rgba(31,209,140,.22), transparent 60%),
+        radial-gradient(700px 520px at 25% 75%, rgba(14,165,114,.18), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow:hidden;
+    }
+
+    .wrap{ height:100%; display:flex; align-items:stretch; justify-content:center; padding:48px 24px; }
+    .card{
+      width:min(900px, 100%); min-height: 82vh;
+      border-radius: 22px; border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      box-shadow: var(--shadow);
+      padding: clamp(20px, 3vw, 34px);
+      position:relative; overflow:hidden;
+      display:flex; flex-direction:column; justify-content:space-between;
+    }
+    .glow{
+      position:absolute; inset:auto -220px -240px auto;
+      width: 580px; height: 580px; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(31,209,140,.22), transparent 62%);
+      filter: blur(2px); pointer-events:none;
+    }
+
+    .topline{ display:flex; align-items:center; gap:10px; font-weight:900; color: rgba(239,255,247,.86); font-size: 13px; }
+    .dot{ width:10px; height:10px; border-radius:50%; background: var(--emerald); box-shadow: 0 0 18px rgba(31,209,140,.35); }
+
+    .terminal{
+      margin-top: 14px; border-radius: 18px; border: 1px solid rgba(239,255,247,.12);
+      background: rgba(0,0,0,.20); padding: 16px 16px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      color: rgba(239,255,247,.88); min-height: 112px;
+    }
+    .line{ margin: 0; line-height: 1.55; font-size: 13.5px; color: rgba(239,255,247,.82); }
+    .line.dim{ color: rgba(239,255,247,.62); }
+
+    .middle{ flex:1 1 auto; display:flex; align-items:center; justify-content:center; padding: 22px 0; text-align:center; }
+    .label{ font-weight: 900; font-size: clamp(20px, 3.4vw, 36px); margin: 0 0 10px; }
+    .name{
+      margin: 0 0 8px; font-size: clamp(36px, 6.6vw, 68px); font-weight: 950; letter-spacing:-1.3px;
+      background: linear-gradient(135deg, rgba(31,209,140,1), rgba(239,255,247,.88));
+      -webkit-background-clip:text; background-clip:text; color: transparent;
+      filter: drop-shadow(0 18px 30px rgba(0,0,0,.25));
+    }
+    .meta{ margin-top: 10px; color: rgba(239,255,247,.74); font-size: 14px; font-weight: 800; }
+    .meta span{ color: rgba(31,209,140,.95); font-weight: 950; }
+
+    .bottom{ flex:0 0 auto; padding-top: 6px; text-align:center; }
+    .ask{ margin-top: 2px; font-size: clamp(18px, 3.1vw, 30px); font-weight: 950; color: rgba(239,255,247,.92); }
+    .actions{ margin-top: 22px; display:flex; justify-content:center; align-items:center; gap: 16px; flex-wrap:wrap; min-height: 62px; }
+
+    .btn{
+      appearance:none; border:0; cursor:pointer;
+      padding: 12px 18px; border-radius: 14px;
+      font-weight: 950; letter-spacing:.2px;
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease, opacity .2s ease;
+      user-select:none; display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      min-width: 168px; text-decoration:none;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn-yes{ color:#02110B; background: linear-gradient(135deg, var(--emerald), rgba(239,255,247,.88)); box-shadow: 0 14px 34px rgba(31,209,140,.20); }
+    .btn-no{ color: rgba(239,255,247,.88); background: rgba(255,255,255,.06); border: 1px solid rgba(239,255,247,.18); min-width: 200px; }
+
+    .no-wrap{ position: relative; display:inline-block; }
+    .no-float{ position: relative; left: 0; top: 0; transition: left .08s ease, top .08s ease; }
+
+    .tooltip{
+      position:absolute; left:50%; transform: translateX(-50%);
+      bottom: calc(100% + 10px);
+      background: rgba(0,0,0,.34); border: 1px solid rgba(239,255,247,.16);
+      color: rgba(239,255,247,.86); padding: 8px 10px; border-radius: 12px; font-size: 12.5px;
+      white-space: nowrap; opacity:0; pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .tooltip.show{ opacity:1; transform: translateX(-50%) translateY(-3px); }
+    .status{
+      margin-top: 12px; min-height: 28px;
+      text-align:center; color: rgba(239,255,247,.74); font-size: 13.5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+    }
+    .footer-note{ margin-top: 8px; color: rgba(239,255,247,.55); font-size: 12.5px; }
+
+    /* Gate */
+    .gate{
+      position:fixed; inset:0; display:grid; place-items:center; padding: 24px;
+      background: rgba(0,0,0,.40); backdrop-filter: blur(10px); z-index: 50;
+    }
+    .gatebox{
+      width:min(560px, 100%); border-radius: 22px; border: 1px solid rgba(239,255,247,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      padding: 22px 18px; text-align:center;
+    }
+    .gatebox h2{ margin: 4px 0 8px; font-size: 20px; font-weight: 950; }
+    .gatebox p{ margin: 0; color: rgba(239,255,247,.72); font-size: 14px; line-height: 1.5; }
+    .row{ margin-top: 14px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    .inp{
+      width: min(360px, 100%); padding: 12px 14px; border-radius: 14px;
+      border: 1px solid rgba(239,255,247,.16); background: rgba(0,0,0,.22);
+      color: rgba(239,255,247,.92); outline: none; font-size: 14px;
+    }
+    .inp::placeholder{ color: rgba(239,255,247,.45); }
+    .gatebtn{
+      padding: 12px 16px; border-radius: 14px; border: 0; cursor:pointer;
+      font-weight: 950; color:#02110B;
+      background: linear-gradient(135deg, var(--emerald), rgba(239,255,247,.88));
+      box-shadow: 0 14px 34px rgba(31,209,140,.18);
+      min-width: 150px;
+    }
+    .gatehint{
+      margin-top: 12px; min-height: 18px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      color: rgba(239,255,247,.62); font-size: 12.5px;
+    }
+    .hidden{ display:none; }
+  </style>
+</head>
+<body>
+  <div class="gate" id="gate">
+    <div class="gatebox" role="dialog" aria-label="Password required">
+      <h2>Restricted Content</h2>
+      <p>This page is protected by an extremely serious security system (me).</p>
+      <div class="row">
+        <input class="inp" id="pw" type="password" autocomplete="off" placeholder="Enter password…" />
+        <button class="gatebtn" id="unlock" type="button">Unlock</button>
+      </div>
+      <div class="gatehint" id="gateHint">Hint: it’s not “password123”.</div>
+    </div>
+  </div>
+
+  <main class="wrap" id="content" style="visibility:hidden;">
+    <section class="card" aria-label="Match results">
+      <div class="glow" aria-hidden="true"></div>
+
+      <div>
+        <div class="topline"><span class="dot"></span> Valentine Finder v1.0 • results</div>
+        <div class="terminal" aria-label="System log">
+          <p class="line dim" id="t1">search.exe --mode=romance --strict=true</p>
+          <p class="line" id="t2">Initializing...</p>
+          <p class="line" id="t3"></p>
+          <p class="line" id="t4"></p>
+        </div>
+      </div>
+
+      <div class="middle">
+        <div>
+          <p class="label">Match Found</p>
+          <h1 class="name" id="herName">Dulcinea</h1>
+          <div class="meta">Confidence level: <span>dangerously high</span></div>
+        </div>
+      </div>
+
+      <div class="bottom">
+        <div class="ask">Will you be my Valentine?</div>
+
+        <div class="actions" aria-label="Answer buttons">
+          <button class="btn btn-yes" id="yesBtn" type="button">
+            YES
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M20 6L9 17l-5-5" stroke="rgba(2,17,11,.9)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <span class="no-wrap" id="noWrap">
+            <span class="tooltip" id="tip">This option has not been tested.</span>
+            <button class="btn btn-no no-float" id="noBtn" type="button">No (report bug)</button>
+          </span>
+        </div>
+
+        <div class="status" id="status" aria-live="polite"></div>
+        <div class="footer-note">System note: I’ve been hoping you’d click “YES.”</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // =========================
+    // SET THIS (required)
+    // =========================
+    // Put the SHA-256 hex hash of your chosen password here (lowercase hex).
+    // You can compute it by opening this page and running in DevTools:
+    //    sha256Hex("YOUR_PASSWORD").then(console.log)
+    const STORED_HASH = "ef6320009305ffb7d31604ffba0adee70663474c9927dd8ccc4babf7ffdf4bde";
+
+    // =========================
+    // SHA-256 helpers
+    // =========================
+    async function sha256HexWebCrypto(str){
+      const data = new TextEncoder().encode(str);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    // Pure JS SHA-256 fallback (fast enough for short passwords)
+    // Source: compact implementation (public domain-style patterns)
+    function sha256HexFallback(ascii) {
+      function rightRotate(value, amount) { return (value>>>amount) | (value<<(32-amount)); }
+      var mathPow=Math.pow, maxWord=mathPow(2,32), lengthProperty='length';
+      var i, j, result='';
+      var words=[], asciiBitLength=ascii[lengthProperty]*8;
+
+      var hash=sha256HexFallback.h=sha256HexFallback.h||[];
+      var k=sha256HexFallback.k=sha256HexFallback.k||[];
+      var primeCounter=k[lengthProperty];
+
+      var isComposite={};
+      for (var candidate=2; primeCounter<64; candidate++) {
+        if (!isComposite[candidate]) {
+          for (i=0; i<313; i+=candidate) isComposite[i]=candidate;
+          hash[primeCounter]=(mathPow(candidate,.5)*maxWord)|0;
+          k[primeCounter++]=(mathPow(candidate,1/3)*maxWord)|0;
+        }
+      }
+
+      ascii += '\x80';
+      while (ascii[lengthProperty]%64 - 56) ascii += '\x00';
+      for (i=0; i<ascii[lengthProperty]; i++) {
+        j=ascii.charCodeAt(i);
+        words[i>>2] |= j << ((3 - i)%4)*8;
+      }
+      words[words[lengthProperty]] = (asciiBitLength/maxWord)|0;
+      words[words[lengthProperty]] = (asciiBitLength);
+
+      for (j=0; j<words[lengthProperty]; ) {
+        var w=words.slice(j, j+=16);
+        var oldHash=hash.slice(0);
+
+        for (i=0; i<64; i++) {
+          var w15=w[i-15], w2=w[i-2];
+          var a=hash[0], e=hash[4];
+          var temp1 = hash[7]
+            + (rightRotate(e,6) ^ rightRotate(e,11) ^ rightRotate(e,25))
+            + ((e&hash[5]) ^ ((~e)&hash[6]))
+            + k[i]
+            + (w[i] = (i<16) ? w[i] : (
+                w[i-16]
+                + (rightRotate(w15,7) ^ rightRotate(w15,18) ^ (w15>>>3))
+                + w[i-7]
+                + (rightRotate(w2,17) ^ rightRotate(w2,19) ^ (w2>>>10))
+              )|0
+            );
+
+          var temp2 = (rightRotate(a,2) ^ rightRotate(a,13) ^ rightRotate(a,22))
+            + ((a&hash[1]) ^ (a&hash[2]) ^ (hash[1]&hash[2]));
+
+          hash = [(temp1+temp2)|0].concat(hash);
+          hash[4] = (hash[4] + temp1)|0;
+          hash.pop();
+        }
+
+        for (i=0; i<8; i++) hash[i] = (hash[i] + oldHash[i])|0;
+      }
+
+      for (i=0; i<8; i++) {
+        for (j=3; j+1; j--) {
+          var b = (hash[i] >> (j*8)) & 255;
+          result += (b < 16 ? '0' : '') + b.toString(16);
+        }
+      }
+      return result;
+    }
+
+    // async function sha256Hex(str){
+    //   // prefer WebCrypto when available + allowed
+    //   try{
+    //     if (window.crypto && crypto.subtle && location.protocol !== "file:") {
+    //       return await sha256HexWebCrypto(str);
+    //     }
+    //   }catch(e){}
+    //   // fallback
+    //   return sha256HexFallback(str);
+    // }
+
+    async function sha256Hex(str){
+        return sha256HexFallback(str);
+    }
+
+    // expose helper for you in console
+    window.sha256Hex = sha256Hex;
+
+    // =========================
+    // Gate logic
+    // =========================
+    const gate = document.getElementById('gate');
+    const content = document.getElementById('content');
+    const hint = document.getElementById('gateHint');
+    const pw = document.getElementById('pw');
+    const unlock = document.getElementById('unlock');
+
+    async function tryUnlock(){
+      const entered = (pw.value || "").trim(); // trim to avoid whitespace mismatch
+
+      if (!entered){
+        hint.textContent = "Nice try. Please enter the password.";
+        return;
+      }
+      if (STORED_HASH === "c9022680f888674e2b2274758755bfa07dea729b68d71cde5c521ed70ef261bf"){
+        hint.textContent = "Dev note: set STORED_HASH in ask.html (see comment).";
+        return;
+      }
+
+      hint.textContent = "Checking... (consulting the love firewall)";
+      const h = (await sha256Hex(entered)).toLowerCase();
+
+      if (h === STORED_HASH.toLowerCase()){
+        gate.classList.add('hidden');
+        content.style.visibility = "visible";
+        startPage();
+      } else {
+        hint.textContent = "Access denied. The system says: ‘try again, cutie.’";
+        pw.value = "";
+        pw.focus();
+      }
+    }
+
+    unlock.addEventListener('click', tryUnlock);
+    pw.addEventListener('keydown', (e)=>{ if(e.key === "Enter") tryUnlock(); });
+
+    // =========================
+    // Page behavior after unlock
+    // =========================
+    function startPage(){
+      // terminal typing
+      const t2 = document.getElementById('t2');
+      const t3 = document.getElementById('t3');
+      const t4 = document.getElementById('t4');
+
+      const lines = [
+        { el: t2, text: "Connecting to heart.database ... OK" },
+        { el: t3, text: "Scanning candidates ... 404 (everyone else)" },
+        { el: t4, text: "✔ 1 result found. Rendering..." }
+      ];
+
+      function typeLine(el, text, speed=16){
+        el.textContent = "";
+        let i=0;
+        return new Promise(res=>{
+          const id = setInterval(()=>{
+            el.textContent += text[i++];
+            if(i >= text.length){ clearInterval(id); res(); }
+          }, speed);
+        });
+      }
+
+      (async function run(){
+        await new Promise(r=>setTimeout(r, 350));
+        for (const L of lines){
+          await typeLine(L.el, L.text, 16);
+          await new Promise(r=>setTimeout(r, 280));
+        }
+      })();
+
+      // button humor
+      const yesBtn = document.getElementById('yesBtn');
+      const noBtn = document.getElementById('noBtn');
+      const noWrap = document.getElementById('noWrap');
+      const tip = document.getElementById('tip');
+      const status = document.getElementById('status');
+
+      function setStatus(msg){ status.textContent = msg; }
+
+      let hoverCount = 0;
+      function nudgeNoButton(){
+        const max = 10 + Math.min(hoverCount * 2, 26);
+        const dx = (Math.random() * 2 - 1) * max;
+        const dy = (Math.random() * 2 - 1) * Math.max(6, max * 0.6);
+        noBtn.style.left = dx.toFixed(0) + "px";
+        noBtn.style.top  = dy.toFixed(0) + "px";
+      }
+
+      noWrap.addEventListener('mouseenter', () => {
+        tip.classList.add('show');
+        setStatus("Hmm… unexpected input detected.");
+      });
+
+      noWrap.addEventListener('mouseleave', () => {
+        tip.classList.remove('show');
+        noBtn.style.left = "0px";
+        noBtn.style.top  = "0px";
+        setStatus("");
+      });
+
+      noBtn.addEventListener('mousemove', () => {
+        hoverCount++;
+        nudgeNoButton();
+        if (hoverCount % 4 === 0) setStatus("Rerouting you to the correct decision...");
+      });
+
+      noBtn.addEventListener('click', () => {
+        tip.classList.remove('show');
+        setStatus("Error 418: I'm a teapot. This decision makes no sense. Retrying…");
+        noBtn.disabled = true; noBtn.style.opacity = ".55";
+        setTimeout(() => {
+          noBtn.disabled = false; noBtn.style.opacity = "1";
+          setStatus("Retry complete. Recommendation: click YES.");
+        }, 1200);
+      });
+
+      yesBtn.addEventListener('click', () => {
+        setStatus("✔ Decision accepted. Valentine secured. Redirecting…");
+        yesBtn.disabled = true;
+        noBtn.disabled = true;
+        setTimeout(() => {
+          window.location.href = "./celebrate.html?name=" + encodeURIComponent(document.getElementById('herName').textContent.trim());
+        }, 900);
+      });
+    }
+  </script>
+</body>
+</html>
