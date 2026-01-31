@@ -95,7 +95,7 @@
 
     .countwrap{
       margin-top: 18px;
-      display:inline-flex;
+      display:flex;
       flex-direction:column;
       gap:10px;
       align-items:center;
@@ -216,6 +216,12 @@
       overflow:hidden;
       position:relative;
       padding: 14px 14px 16px;
+    }
+    .scanner-wrap{
+      display: none;
+    }
+    .scanner-wrap.show{
+      display: flex;
     }
     .scan-top{
       display:flex;
@@ -433,9 +439,26 @@
     }
 
     // Help button
+    const scannerWrap = document.querySelector('.scanner-wrap');
+    let armed=false;
+
     document.getElementById('helpBtn').addEventListener('click', () => {
       showToast("Hint: If you're not Dulcinea, keep searching. Also… maybe try scanning 👀");
+      scannerWrap.classList.add('show');
+
+      armed =false;
+      scanState.textContent= "IDLE";
+      scanMsg.innerHTML= "Move your mouse over the scanner to begin.";
+
+      const armOnce = () => { armed = true; };
+      document.addEventListener('mousemove', armOnce, { once: true });
     });
+
+    // document.addEventListener('mousemove', () => {
+    //     armed = true;
+    //   }, { once: true });
+
+
 
     // Scan to reveal Continue
     const scanner = document.querySelector('.scanner');
@@ -473,22 +496,32 @@
     }
 
     scanner.addEventListener('mouseenter', () => {
+      if (!armed) return;
       if (continueBtn.classList.contains('show')) return;
+
       scanning = true;
       scanState.textContent = "SCANNING";
-      scanMsg.innerHTML = "Scanning for a valid Valentine…<br/>Hold steady. Don’t blink. (Okay blink, just stay here.)";
+      scanMsg.innerHTML =
+        "Scanning for a valid Valentine…<br/>Hold steady. Don’t blink. (Okay blink, just stay here.)";
+
       if (!rafId) rafId = requestAnimationFrame(animateScan);
     });
 
+
     scanner.addEventListener('mouseleave', () => {
+      if (!armed) return;
       if (continueBtn.classList.contains('show')) return;
+
       scanning = false;
       scanState.textContent = "PAUSED";
       scanMsg.innerHTML = "Scan paused.<br/>Reason: user fled the scene.";
+
       progress = Math.max(0, progress - 18);
       setBeam(-120 + (progress * 2.2));
+
       if (rafId){ cancelAnimationFrame(rafId); rafId = null; }
     });
+
 
     // Easter egg: invisible corner target instantly unlocks
     ghost.addEventListener('click', () => {

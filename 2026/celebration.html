@@ -226,14 +226,39 @@
           <button class="btn btn-ghost" id="replay" type="button" aria-label="Replay confetti">
             Replay confetti
           </button>
-        </div>
 
+          <button class="btn btn-ghost" id="audioToggle" type="button" aria-label="Play or pause music">
+            Play music
+          </button>
+
+
+        </div>
+        
+        <audio id="bgm" preload="auto" loop>
+          <source src="sunshine-cute-baby.mp3" type="audio/mpeg" />
+        </audio>
         <div class="fine">Log: commit("us") ✅ • push("forever-ish") ✅</div>
       </div>
     </section>
   </main>
 
   <script>
+    // ----- HARD GATE: one-time entry only -----
+    (function gateCelebration(){
+      const key = "val_celebrate_unlock";
+      const token = sessionStorage.getItem(key);
+
+      if (!token) {
+        window.location.replace("./ask.html");
+        return;
+      }
+
+      // consume immediately (single-use)
+      sessionStorage.removeItem(key);
+      history.replaceState(null, "", location.href);
+    })();
+
+
     // ----- Personalize with ?name= -----
     const params = new URLSearchParams(window.location.search);
     const name = (params.get('name') || "").trim();
@@ -342,6 +367,38 @@
     document.getElementById('replay').addEventListener('click', () => {
       spawn();
     });
+
+      // ----- Music (MP3) + Play/Pause -----
+  const bgm = document.getElementById('bgm');
+  const audioToggle = document.getElementById('audioToggle');
+
+  function setAudioBtn(){
+    audioToggle.textContent = bgm.paused ? "Play music" : "Pause music";
+  }
+
+  async function tryPlay(){
+    try{
+      await bgm.play();
+    }catch(e){
+      // Autoplay may be blocked until user interacts; ignore.
+    }
+    setAudioBtn();
+  }
+
+  // Try to start music on first user interaction (required by most browsers)
+  window.addEventListener('pointerdown', tryPlay, { once: true });
+
+  audioToggle.addEventListener('click', async () => {
+    if (bgm.paused){
+      await tryPlay();
+    } else {
+      bgm.pause();
+      setAudioBtn();
+    }
+  });
+
+  setAudioBtn();
+
   </script>
 </body>
 </html>

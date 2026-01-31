@@ -193,7 +193,7 @@
 
   <script>
 
-    const STORED_HASH = "ef6320009305ffb7d31604ffba0adee70663474c9927dd8ccc4babf7ffdf4bde";
+    const STORED_HASH = "ad13e962ae5f2fbd6d9f7cde4d1dc45727009e5393690b55c5ebbd9b1a714bb1";
 
     async function sha256HexWebCrypto(str){
       const data = new TextEncoder().encode(str);
@@ -292,10 +292,10 @@
         hint.textContent = "Nice try. Please enter the password.";
         return;
       }
-      if (STORED_HASH === "c9022680f888674e2b2274758755bfa07dea729b68d71cde5c521ed70ef261bf"){
-        hint.textContent = "Dev note: set STORED_HASH in ask.html (see comment).";
-        return;
-      }
+      // if (STORED_HASH === "ad13e962ae5f2fbd6d9f7cde4d1dc45727009e5393690b55c5ebbd9b1a714bb1"){
+      //   // hint.textContent = "Dev note: set STORED_HASH in ask.html (see comment).";
+      //   return;
+      // }
 
       hint.textContent = "Checking... (consulting the love firewall)";
       const h = (await sha256Hex(entered)).toLowerCase();
@@ -305,7 +305,7 @@
         content.style.visibility = "visible";
         startPage();
       } else {
-        hint.textContent = "Access denied. The system says: ‘try again, cutie.’";
+        hint.textContent = "Access denied. The system says: 'try again, cutie.'";
         pw.value = "";
         pw.focus();
       }
@@ -391,15 +391,29 @@
         }, 1200);
       });
 
-      yesBtn.addEventListener('click', () => {
-        setStatus("✔ Decision accepted. Valentine secured. Redirecting…");
-        yesBtn.disabled = true;
-        noBtn.disabled = true;
-        setTimeout(() => {
-          window.location.href = "./celebrate.html?name=" + encodeURIComponent(document.getElementById('herName').textContent.trim());
-        }, 900);
-      });
-    }
+    yesBtn.addEventListener('click', () => {
+      setStatus("✔ Decision accepted. Valentine secured. Redirecting…");
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+
+      // 🔐 one-time unlock token
+      const token = crypto.randomUUID
+        ? crypto.randomUUID()
+        : String(Date.now()) + Math.random();
+
+      sessionStorage.setItem("val_celebrate_unlock", token);
+
+      setTimeout(() => {
+        window.location.replace(
+          "./celebration.html?name=" +
+          encodeURIComponent(
+            document.getElementById('herName').textContent.trim()
+          )
+        );
+      }, 900);
+    });
+  }
+
   </script>
 </body>
 </html>
