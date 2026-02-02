@@ -35,7 +35,6 @@
       pointer-events:none;
     }
 
-    /* new: spaced layout */
     .wrap{
       height:100%;
       display:flex;
@@ -126,6 +125,22 @@
       color: rgba(239,255,247,.92);
     }
 
+    /* NEW: gif under mission accomplished */
+    .gifwrap{
+      margin-top: 14px;
+      display:flex;
+      justify-content:center;
+    }
+    .gifwrap img{
+      width: min(520px, 100%);
+      max-height: 260px;
+      object-fit: contain;     /* shrink, do not crop */
+      border-radius: 16px;
+      border: 1px solid rgba(239,255,247,.14);
+      background: rgba(0,0,0,.18);
+      box-shadow: 0 16px 44px rgba(0,0,0,.22);
+    }
+
     .bottom{
       flex: 0 0 auto;
       padding-bottom: 2px;
@@ -186,6 +201,7 @@
       .card{ min-height: 86vh; }
       .btn{ min-width: 100%; }
       .btn-ghost{ min-width: 100%; }
+      .gifwrap img{ max-height: 220px; }
     }
   </style>
 </head>
@@ -194,12 +210,10 @@
 
   <main class="wrap">
     <section class="card" aria-label="Celebration">
-      <!-- TOP -->
       <div class="top">
         <div class="badge"><span class="dot"></span> Status: Valentine Secured</div>
       </div>
 
-      <!-- MIDDLE -->
       <div class="middle">
         <div class="stack">
           <h1 id="headline">YES detected.</h1>
@@ -210,10 +224,15 @@
           </p>
 
           <div class="big" id="bigline">Valentine secured. Mission accomplished.</div>
+
+          <!-- NEW: GIF under mission accomplished -->
+          <div class="gifwrap">
+            <!-- Replace src with your gif file (local) or a direct gif URL -->
+            <img id="missionGif" src="mindblown.gif" alt="Mission accomplished" />
+          </div>
         </div>
       </div>
 
-      <!-- BOTTOM -->
       <div class="bottom">
         <div class="btnrow">
           <a class="btn" href="./carried_away.html" aria-label="Continue">
@@ -230,13 +249,12 @@
           <button class="btn btn-ghost" id="audioToggle" type="button" aria-label="Play or pause music">
             Play music
           </button>
-
-
         </div>
-        
+
         <audio id="bgm" preload="auto" loop>
           <source src="sunshine-cute-baby.mp3" type="audio/mpeg" />
         </audio>
+
         <div class="fine">Log: commit("us") ✅ • push("forever-ish") ✅</div>
       </div>
     </section>
@@ -257,7 +275,6 @@
       sessionStorage.removeItem(key);
       history.replaceState(null, "", location.href);
     })();
-
 
     // ----- Personalize with ?name= -----
     const params = new URLSearchParams(window.location.search);
@@ -368,37 +385,31 @@
       spawn();
     });
 
-      // ----- Music (MP3) + Play/Pause -----
-  const bgm = document.getElementById('bgm');
-  const audioToggle = document.getElementById('audioToggle');
+    // ----- Music (MP3) + Play/Pause -----
+    const bgm = document.getElementById('bgm');
+    const audioToggle = document.getElementById('audioToggle');
 
-  function setAudioBtn(){
-    audioToggle.textContent = bgm.paused ? "Play music" : "Pause music";
-  }
-
-  async function tryPlay(){
-    try{
-      await bgm.play();
-    }catch(e){
-      // Autoplay may be blocked until user interacts; ignore.
+    function setAudioBtn(){
+      audioToggle.textContent = bgm.paused ? "Play music" : "Pause music";
     }
-    setAudioBtn();
-  }
 
-  // Try to start music on first user interaction (required by most browsers)
-  window.addEventListener('pointerdown', tryPlay, { once: true });
-
-  audioToggle.addEventListener('click', async () => {
-    if (bgm.paused){
-      await tryPlay();
-    } else {
-      bgm.pause();
+    async function tryPlay(){
+      try{ await bgm.play(); }catch(e){}
       setAudioBtn();
     }
-  });
 
-  setAudioBtn();
+    window.addEventListener('pointerdown', tryPlay, { once: true });
 
+    audioToggle.addEventListener('click', async () => {
+      if (bgm.paused){
+        await tryPlay();
+      } else {
+        bgm.pause();
+        setAudioBtn();
+      }
+    });
+
+    setAudioBtn();
   </script>
 </body>
 </html>

@@ -20,10 +20,19 @@
         radial-gradient(900px 600px at 70% 25%, rgba(31,209,140,.22), transparent 60%),
         radial-gradient(700px 520px at 25% 75%, rgba(14,165,114,.18), transparent 60%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
-      overflow:hidden;
+      overflow-x:hidden;
+      overflow-y:auto;
+      -webkit-overflow-scrolling: touch;
     }
 
-    .wrap{ height:100%; display:flex; align-items:stretch; justify-content:center; padding:48px 24px; }
+    .wrap{
+      min-height: 100dvh;
+      height:auto;
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+      padding:48px 24px;
+    }
     .card{
       width:min(900px, 100%); min-height: 82vh;
       border-radius: 22px; border: 1px solid var(--border);
@@ -148,6 +157,36 @@
     }
     .reveal.delay1{ transition-delay: .05s; }
     .reveal.delay2{ transition-delay: .18s; }
+
+    /* ---------- Mobile usability ---------- */
+    .inp{ font-size:16px; } /* prevents iOS zoom */
+
+    @media (max-width: 560px){
+      body{ overflow-y:auto; }
+      .wrap{ padding: 22px 14px; min-height: 100dvh; }
+      .card{
+        min-height: auto;
+        padding: 18px 16px;
+      }
+      .terminal{ padding: 14px 12px; min-height: 104px; }
+      .actions{
+        gap: 12px;
+        min-height: 0;
+      }
+      .btn{
+        width: 100%;
+        min-width: 0;
+        padding: 14px 16px;
+        border-radius: 16px;
+        font-size: 16px;
+      }
+      .btn-no{ min-width: 0; }
+      .footer-note{ font-size: 12px; }
+    }
+
+    @media (hover: none){
+      .btn:hover{ transform:none; }
+    }
   </style>
 </head>
 <body>
@@ -185,7 +224,6 @@
         </div>
       </div>
 
-
       <div class="bottom reveal delay2" id="questionBlock">
         <div class="ask">Will you be my Valentine?</div>
 
@@ -210,7 +248,6 @@
   </main>
 
   <script>
-
     const STORED_HASH = "ad13e962ae5f2fbd6d9f7cde4d1dc45727009e5393690b55c5ebbd9b1a714bb1";
 
     async function sha256HexWebCrypto(str){
@@ -288,10 +325,9 @@
     }
 
     async function sha256Hex(str){
-        return sha256HexFallback(str);
+      return sha256HexFallback(str);
     }
 
-    // expose helper for you in console
     window.sha256Hex = sha256Hex;
 
     // =========================
@@ -304,16 +340,12 @@
     const unlock = document.getElementById('unlock');
 
     async function tryUnlock(){
-      const entered = (pw.value || "").trim(); // trim to avoid whitespace mismatch
+      const entered = (pw.value || "").trim();
 
       if (!entered){
         hint.textContent = "Nice try. Please enter the password.";
         return;
       }
-      // if (STORED_HASH === "ad13e962ae5f2fbd6d9f7cde4d1dc45727009e5393690b55c5ebbd9b1a714bb1"){
-      //   // hint.textContent = "Dev note: set STORED_HASH in ask.html (see comment).";
-      //   return;
-      // }
 
       hint.textContent = "Checking... (consulting the love firewall)";
       const h = (await sha256Hex(entered)).toLowerCase();
@@ -346,7 +378,6 @@
       const matchBlock = document.getElementById('matchBlock');
       const questionBlock = document.getElementById('questionBlock');
 
-
       function typeLine(el, text, speed=16){
         el.textContent = "";
         let i=0;
@@ -370,7 +401,6 @@
         });
       })();
 
-
       // button humor
       const yesBtn = document.getElementById('yesBtn');
       const noBtn = document.getElementById('noBtn');
@@ -381,30 +411,65 @@
       function setStatus(msg){ status.textContent = msg; }
 
       let hoverCount = 0;
-      function nudgeNoButton(){
-        const max = 10 + Math.min(hoverCount * 2, 26);
-        const dx = (Math.random() * 2 - 1) * max;
-        const dy = (Math.random() * 2 - 1) * Math.max(6, max * 0.6);
-        noBtn.style.left = dx.toFixed(0) + "px";
-        noBtn.style.top  = dy.toFixed(0) + "px";
-      }
 
-      noWrap.addEventListener('mouseenter', () => {
-        tip.classList.add('show');
-        setStatus("Hmm… unexpected input detected.");
-      });
-
-      noWrap.addEventListener('mouseleave', () => {
-        tip.classList.remove('show');
+      function resetNo(){
         noBtn.style.left = "0px";
         noBtn.style.top  = "0px";
+      }
+
+      function nudgeNoButton(){
+        hoverCount++;
+
+        // Bound movement so it stays usable on small screens
+        const wrapRect = noWrap.getBoundingClientRect();
+        const btnRect  = noBtn.getBoundingClientRect();
+
+        const maxX = Math.max(0, (wrapRect.width - btnRect.width) / 2);
+        const maxY = 28;
+
+        const dx = (Math.random() * 2 - 1) * maxX;
+        const dy = (Math.random() * 2 - 1) * maxY;
+
+        noBtn.style.left = dx.toFixed(0) + "px";
+        noBtn.style.top  = dy.toFixed(0) + "px";
+
+        if (hoverCount % 3 === 0) setStatus("Rerouting you to the correct decision...");
+      }
+
+      function showTip(){
+        tip.classList.add('show');
+        setStatus("Hmm… unexpected input detected.");
+      }
+      function hideTip(){
+        tip.classList.remove('show');
+        resetNo();
         setStatus("");
+      }
+
+      /* Desktop hover */
+      noWrap.addEventListener('mouseenter', showTip);
+      noWrap.addEventListener('mouseleave', hideTip);
+      noWrap.addEventListener('pointerenter', showTip);
+      noWrap.addEventListener('pointerleave', hideTip);
+
+      /* Desktop mouse chase */
+      noBtn.addEventListener('mousemove', () => {
+        nudgeNoButton();
       });
 
-      noBtn.addEventListener('mousemove', () => {
-        hoverCount++;
+      /* Mobile/touch: dodge on tap attempt */
+      noBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        showTip();
         nudgeNoButton();
-        if (hoverCount % 4 === 0) setStatus("Rerouting you to the correct decision...");
+      }, { passive: false });
+
+      noBtn.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === "touch") {
+          e.preventDefault();
+          showTip();
+          nudgeNoButton();
+        }
       });
 
       noBtn.addEventListener('click', () => {
@@ -417,29 +482,27 @@
         }, 1200);
       });
 
-    yesBtn.addEventListener('click', () => {
-      setStatus("✔ Decision accepted. Valentine secured. Redirecting…");
-      yesBtn.disabled = true;
-      noBtn.disabled = true;
+      yesBtn.addEventListener('click', () => {
+        setStatus("✔ Decision accepted. Valentine secured. Redirecting…");
+        yesBtn.disabled = true;
+        noBtn.disabled = true;
 
-      // 🔐 one-time unlock token
-      const token = crypto.randomUUID
-        ? crypto.randomUUID()
-        : String(Date.now()) + Math.random();
+        const token = crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now()) + Math.random();
 
-      sessionStorage.setItem("val_celebrate_unlock", token);
+        sessionStorage.setItem("val_celebrate_unlock", token);
 
-      setTimeout(() => {
-        window.location.replace(
-          "./celebration.html?name=" +
-          encodeURIComponent(
-            document.getElementById('herName').textContent.trim()
-          )
-        );
-      }, 900);
-    });
-  }
-
+        setTimeout(() => {
+          window.location.replace(
+            "./celebration.html?name=" +
+            encodeURIComponent(
+              document.getElementById('herName').textContent.trim()
+            )
+          );
+        }, 900);
+      });
+    }
   </script>
 </body>
 </html>
