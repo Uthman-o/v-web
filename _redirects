@@ -1,2 +1,10 @@
-/  /landing.html  200
+# Always serve landing at the site root
+/              /landing.html     200
+
+# Prevent “/2025” and “/2026” direct hits (common deep-link). Send to landing.
+# (Does NOT block /2025/* assets/pages; the JS token gate will handle those.)
+/2025          /landing.html     302
+/2025/         /landing.html     302
+/2026          /landing.html     302
+/2026/         /landing.html     302
 
