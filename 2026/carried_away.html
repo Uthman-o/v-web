@@ -15,6 +15,7 @@
     }
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
+
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
@@ -23,13 +24,14 @@
         radial-gradient(900px 600px at 70% 25%, rgba(31,209,140,.22), transparent 60%),
         radial-gradient(700px 520px at 25% 75%, rgba(14,165,114,.18), transparent 60%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
-      overflow:hidden; /* no scrollbars */
+      overflow:hidden; /* desktop: no scrollbars */
     }
 
     .app{
       height:100%;
       display:grid;
       grid-template-columns: 300px 1fr;
+      min-height: 100vh;
     }
 
     /* LEFT NAV */
@@ -38,7 +40,7 @@
       border-right: 1px solid rgba(239,255,247,.10);
       background: rgba(0,0,0,.18);
       backdrop-filter: blur(10px);
-      overflow:hidden; /* no scrolling */
+      overflow:hidden; /* desktop: no scrolling */
       display:flex;
       flex-direction:column;
       gap: 14px;
@@ -63,8 +65,8 @@
       flex: 1 1 auto;
       display:flex;
       flex-direction:column;
-      justify-content:flex-start; /* top to bottom */
-      gap: 12px; /* spaced out */
+      justify-content:flex-start;
+      gap: 12px;
       padding: 6px 2px;
     }
     .navbtn{
@@ -84,6 +86,8 @@
       align-items:center;
       justify-content:space-between;
       gap: 10px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
     .navbtn:hover{
       transform: translateY(-1px);
@@ -124,17 +128,14 @@
       text-decoration:none;
       border:0;
       box-shadow: 0 14px 34px rgba(31,209,140,.18);
-    }
-    .hint{
-      color: rgba(239,255,247,.62);
-      font-size: 12px;
-      line-height:1.35;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
     /* RIGHT PANEL */
     main{
       padding: 22px;
-      overflow:hidden; /* no scrollbars */
+      overflow:hidden; /* desktop: no scrollbars */
       display:flex;
       align-items:stretch;
       justify-content:stretch;
@@ -149,6 +150,7 @@
       overflow:hidden;
       display:flex;
       flex-direction:column;
+      min-height: 0; /* important for nested flex/grid */
     }
 
     .panelHead{
@@ -180,21 +182,20 @@
       margin-top: 2px;
     }
 
-    /* Content area: no scrolling */
     .panelBody{
       flex: 1 1 auto;
       padding: 16px;
       overflow:hidden;
       display:flex;
       align-items:center;
-      justify-content:center; /* centralize for non-image UIs */
+      justify-content:center;
+      min-height: 0; /* enables inner content to size correctly */
     }
     .panelBody.stretch{
-        align-items: stretch;
-        justify-content: stretch;
+      align-items: stretch;
+      justify-content: stretch;
     }
 
-    /* Content cards */
     .card{
       width: 100%;
       height: 100%;
@@ -206,40 +207,29 @@
       display:flex;
       flex-direction:column;
       gap: 12px;
+      min-height: 0;
     }
 
-    /* APOD: header / media / explanation / buttons - no overlap */
-        .apodCard{
-        height: 100%;
-        display: grid;
-        grid-template-rows: auto minmax(0, 1fr) auto auto;
-        gap: 12px;
-        }
+    /* APOD layout */
+    .apodCard{
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto auto;
+      gap: 12px;
+      min-height: 0;
+    }
+    .apodCard .mediaBox{ min-height: 0; }
+    .apodCard .mediaBox img{ width:100%; height:100%; object-fit: contain; }
 
-        /* Ensure the media box can actually shrink inside the grid */
-        .apodCard .mediaBox{
-        min-height: 0;          /* IMPORTANT: enables minmax(0,1fr) to work properly */
-        }
+    .apodExpl{
+      max-height: 34vh;
+      overflow: auto;
+      padding-right: 6px;
+    }
 
-        /* Full image visible (no cropping) */
-        .apodCard .mediaBox img{
-        width: 100%;
-        height: 100%;
-        object-fit: contain;    /* shrink to fit */
-        }
-
-        /* Show full explanation: scroll only inside explanation if it’s long */
-        .apodExpl{
-        max-height: 34vh;
-        overflow: auto;
-        padding-right: 6px;
-        }
-
-
-    /* Image/video area: SHRINK to fit, never crop */
     .mediaBox{
       width:100%;
-      flex: 1 1 auto;               /* uses remaining space */
+      flex: 1 1 auto;
       min-height: 180px;
       border: 1px solid rgba(239,255,247,.10);
       border-radius: 16px;
@@ -247,11 +237,12 @@
       overflow:hidden;
       display:grid;
       place-items:center;
+      min-height: 0;
     }
     .mediaBox img{
       max-width: 100%;
       max-height: 100%;
-      object-fit: contain; /* key: shrink, don't crop */
+      object-fit: contain;
       display:block;
     }
     .mediaBox iframe{
@@ -277,7 +268,7 @@
       gap:10px;
       flex-wrap:wrap;
       align-items:center;
-      justify-content:center; /* centered for non-image UI */
+      justify-content:center;
     }
     .btn{
       border: 1px solid rgba(239,255,247,.16);
@@ -290,6 +281,8 @@
       font-size: 13px;
       user-select:none;
       transition: transform .10s ease, border-color .12s ease, background .12s ease;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
     .btn:hover{
       transform: translateY(-1px);
@@ -314,6 +307,7 @@
       outline:none;
       font-size: 14px;
       font-weight: 750;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* Trivia */
@@ -341,16 +335,15 @@
       font-weight: 900;
       font-size: 13px;
       transition: transform .08s ease, background .12s ease, border-color .12s ease;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
     .choice:hover{ transform: translateY(-1px); border-color: rgba(239,255,247,.22); background: rgba(255,255,255,.08); }
     .choice:active{ transform: translateY(0); }
     .choice.correct{ border-color: rgba(31,209,140,.55); background: rgba(31,209,140,.14); }
     .choice.wrong{ border-color: rgba(255,142,142,.45); background: rgba(255,142,142,.10); }
-    .card.scrollOK{ overflow:auto;}
-    .navbtn:disabled{
-        opacity:.6;
-        cursor:not-allowed;}
-
+    .card.scrollOK{ overflow:auto; }
+    .navbtn:disabled{ opacity:.6; cursor:not-allowed; }
 
     /* Fade-in */
     @keyframes fadeUp {
@@ -359,6 +352,127 @@
     }
     .fade{ opacity:0; animation: fadeUp .55s cubic-bezier(.2,.9,.2,1) forwards; }
     .d1{ animation-delay:.03s } .d2{ animation-delay:.12s } .d3{ animation-delay:.22s }
+
+    /* ============================
+       MOBILE FIX
+       - stack layout (nav on top)
+       - allow vertical scroll (only on mobile)
+       - remove "overflow:hidden" traps
+       - keep panel content usable
+    ============================ */
+    @media (max-width: 860px){
+      body{
+        overflow:auto;                 /* allow page scroll on mobile */
+        overflow-x:hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .app{
+        height:auto;
+        min-height: 100dvh;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+
+      aside{
+        border-right: 0;
+        border-bottom: 1px solid rgba(239,255,247,.10);
+        padding: 14px 14px 12px;
+        overflow: visible;             /* allow nav to flow */
+        gap: 10px;
+      }
+
+      .brand{
+        padding: 0;
+        display:flex;
+        align-items: baseline;
+        justify-content:space-between;
+        gap: 10px;
+      }
+      .brand h1{ font-size: 18px; }
+      .brand p{ display:none; }
+
+      /* Convert the left nav into a horizontal, swipeable chip row */
+      .nav{
+        flex: 0 0 auto;
+        display:flex;
+        flex-direction:row;
+        gap: 10px;
+        padding: 4px 0;
+        overflow-x:auto;
+        overflow-y:hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+      }
+      .nav::-webkit-scrollbar{ height: 0; }
+
+      .navbtn{
+        width:auto;
+        min-width: 220px;
+        padding: 12px 12px;
+        scroll-snap-align: start;
+      }
+
+      .foot{
+        flex-direction:row;
+        align-items:center;
+        justify-content:flex-end;
+        padding: 0;
+      }
+      .cont{
+        width:auto;
+        padding: 10px 12px;
+        border-radius: 12px;
+        box-shadow: 0 12px 30px rgba(31,209,140,.14);
+      }
+
+      main{
+        padding: 14px;
+        overflow: visible;            /* allow the panel to size naturally */
+      }
+
+      .panel{
+        height: auto;
+        min-height: calc(100dvh - 220px); /* gives room below nav/header */
+      }
+
+      .panelHead{
+        align-items:flex-start;
+      }
+
+      /* More usable media on small screens */
+      .mediaBox{
+        min-height: 220px;
+      }
+
+      /* Let explanation scroll inside itself on mobile too */
+      .apodExpl{
+        max-height: 28vh;
+      }
+
+      /* Inputs/buttons full width */
+      .row{
+        justify-content:center;
+      }
+      input{
+        width: 100%;
+      }
+      .btn{
+        width: auto;
+      }
+    }
+
+    @media (max-width: 520px){
+      .navbtn{ min-width: 200px; }
+      .panelHead{ padding: 12px 12px 10px; }
+      .panelBody{ padding: 12px; }
+      .card{ padding: 12px; }
+      .mediaBox{ min-height: 200px; }
+    }
+
+    @media (hover: none){
+      .navbtn:hover, .btn:hover, .choice:hover{ transform:none; }
+    }
   </style>
 </head>
 <body>
@@ -366,7 +480,6 @@
     <aside>
       <div class="brand">
         <h1>I got carried away</h1>
-        <!-- <p>Choose an API on the left. Output fills the right side. Images shrink to fit (no cropping).</p> -->
       </div>
 
       <div class="nav" id="nav">
@@ -403,7 +516,6 @@
 
       <div class="foot">
         <a class="cont" href="../landing.html">Leave</a>
-        <!-- <div class="hint">Change Continue’s href to your next page.</div> -->
       </div>
     </aside>
 
@@ -417,9 +529,7 @@
           <div class="status" id="status">Idle</div>
         </div>
 
-        <div class="panelBody" id="panelBody">
-          <!-- Dynamic -->
-        </div>
+        <div class="panelBody" id="panelBody"></div>
       </section>
     </main>
   </div>
@@ -428,7 +538,6 @@
     // ============================
     // CONFIG
     // ============================
-    // Replace with your NASA key:
     const NASA_KEY = "hXa5FOiGgl2VdZIRtuUHSbIgcI8ChaeEBGRPLWfW";
 
     const panelTitle = document.getElementById("panelTitle");
@@ -442,7 +551,6 @@
     function escapeHTML(s){
       return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
-    // OpenTrivia returns HTML entities
     function decodeEntities(str){
       const txt = document.createElement("textarea");
       txt.innerHTML = str;
@@ -481,68 +589,61 @@
     // VIEWS
     // ============================
     async function viewNASA(){
-    panelTitle.textContent = "NASA APOD";
-    panelSub.textContent = "Astronomy Picture of the Day";
-    setStatus("Loading…");
+      panelTitle.textContent = "NASA APOD";
+      panelSub.textContent = "Astronomy Picture of the Day";
+      setStatus("Loading…");
 
-    // Stretch the right panel for media layout
-    panelBody.classList.add("stretch");
+      panelBody.classList.add("stretch");
 
-    // One-call-per-click: disable nav button during fetch
-    const nasaBtn = document.querySelector('.navbtn[data-key="nasa"]');
-    nasaBtn.disabled = true;
+      const nasaBtn = document.querySelector('.navbtn[data-key="nasa"]');
+      nasaBtn.disabled = true;
 
-    try{
+      try{
         const apod = await fetchJSON(
-        `https://api.nasa.gov/planetary/apod?api_key=${encodeURIComponent(NASA_KEY)}`
+          `https://api.nasa.gov/planetary/apod?api_key=${encodeURIComponent(NASA_KEY)}`
         );
 
         const card = makeCard();
         card.classList.add("apodCard");
 
-        // Header (no clamping)
         const header = document.createElement("p");
         header.className = "text fade d2";
         header.innerHTML = `<b>${escapeHTML(apod.title || "")}</b> • ${escapeHTML(apod.date || "")}`;
         card.appendChild(header);
 
-        // Media (fills remaining space, never covers text)
         const mediaBox = document.createElement("div");
         mediaBox.className = "mediaBox fade d2";
 
         if (apod.media_type === "image") {
-        const img = document.createElement("img");
-        img.alt = apod.title || "APOD";
-        img.src = apod.hdurl || apod.url;
+          const img = document.createElement("img");
+          img.alt = apod.title || "APOD";
+          img.src = apod.hdurl || apod.url;
 
-        img.style.opacity = "0";
-        img.onload = () => { img.style.transition = "opacity .55s ease"; img.style.opacity = "1"; };
+          img.style.opacity = "0";
+          img.onload = () => { img.style.transition = "opacity .55s ease"; img.style.opacity = "1"; };
 
-        mediaBox.appendChild(img);
+          mediaBox.appendChild(img);
         } else if (apod.media_type === "video") {
-        const iframe = document.createElement("iframe");
-        iframe.className = "media";
-        iframe.src = apod.url;
-        iframe.allowFullscreen = true;
-        mediaBox.appendChild(iframe);
+          const iframe = document.createElement("iframe");
+          iframe.src = apod.url;
+          iframe.allowFullscreen = true;
+          mediaBox.appendChild(iframe);
         } else {
-        mediaBox.textContent = "Unsupported media type.";
+          mediaBox.textContent = "Unsupported media type.";
         }
 
         card.appendChild(mediaBox);
 
-        // Explanation (full text; scrolls inside its own area if long)
         const expl = document.createElement("p");
         expl.className = "text fade d3 apodExpl";
         expl.textContent = apod.explanation || "";
         card.appendChild(expl);
 
-        // Buttons
         const row = document.createElement("div");
         row.className = "row fade d3";
         row.append(
-        makeBtn("Reload", true, () => select("nasa")),
-        (() => {
+          makeBtn("Reload", true, () => select("nasa")),
+          (() => {
             const a = document.createElement("a");
             a.className = "btn";
             a.href = apod.url || "#";
@@ -550,13 +651,13 @@
             a.rel = "noreferrer";
             a.textContent = "Open media";
             return a;
-        })()
+          })()
         );
         card.appendChild(row);
 
         mount(card);
         setStatus("OK");
-    } catch(e){
+      } catch(e){
         setStatus("Error");
         const card = makeCard();
         const p = document.createElement("p");
@@ -564,11 +665,10 @@
         p.innerHTML = `<b>Error:</b> ${escapeHTML(String(e.message || e))}`;
         card.appendChild(p);
         mount(card);
-    } finally {
+      } finally {
         nasaBtn.disabled = false;
+      }
     }
-    }
-
 
     async function viewMeteo(){
       panelTitle.textContent = "Weather";
@@ -596,19 +696,18 @@
 
           setStatus("Loading…");
           const wx = await fetchJSON(
-             `https://api.open-meteo.com/v1/forecast?latitude=${hit.latitude}&longitude=${hit.longitude}` +
+            `https://api.open-meteo.com/v1/forecast?latitude=${hit.latitude}&longitude=${hit.longitude}` +
             `&current=temperature_2m,apparent_temperature,relative_humidity_2m,uv_index,wind_speed_10m` +
             `&temperature_unit=fahrenheit&windspeed_unit=mph`
           );
 
           const cur = wx.current || {};
           const feelsLike = cur.apparent_temperature;
-            const humidity  = cur.relative_humidity_2m;
-            const uv        = cur.uv_index;
+          const humidity  = cur.relative_humidity_2m;
+          const uv        = cur.uv_index;
 
           const name = [hit.name, hit.admin1, hit.country].filter(Boolean).join(", ");
 
-          // Replace / create results block in card
           let res = card.querySelector("[data-role='wx']");
           if (!res){
             res = document.createElement("div");
@@ -627,24 +726,20 @@
             d.style.borderRadius = "14px";
             d.style.padding = "12px";
             d.innerHTML =
-              `<div style="color:${"rgba(239,255,247,.72)"};font-size:12px;font-weight:900">${escapeHTML(k)}</div>` +
+              `<div style="color:rgba(239,255,247,.72);font-size:12px;font-weight:900">${escapeHTML(k)}</div>` +
               `<div style="margin-top:6px;font-size:16px;font-weight:950;letter-spacing:-.2px">${escapeHTML(v)}</div>`;
             return d;
           };
 
-            res.append(
-                tile("Location", name || "—"),
-                tile("Updated", cur.time || "—"),
-
-                tile("Temperature", (cur.temperature_2m ?? "—") + " °F"),
-                tile("Feels Like", (feelsLike ?? "—") + " °F"),
-
-                tile("Humidity", (humidity ?? "—") + " %"),
-                tile("UV Index", (uv ?? "—")),
-
-                tile("Wind", (cur.wind_speed_10m ?? "—") + " mph")
-                );
-
+          res.append(
+            tile("Location", name || "—"),
+            tile("Updated", cur.time || "—"),
+            tile("Temperature", (cur.temperature_2m ?? "—") + " °F"),
+            tile("Feels Like", (feelsLike ?? "—") + " °F"),
+            tile("Humidity", (humidity ?? "—") + " %"),
+            tile("UV Index", (uv ?? "—")),
+            tile("Wind", (cur.wind_speed_10m ?? "—") + " mph")
+          );
 
           setStatus("OK");
         } catch(e){
@@ -656,12 +751,6 @@
 
       row.append(input, go);
       card.appendChild(row);
-
-      const helper = document.createElement("p");
-      helper.className = "text clamp3";
-      helper.style.color = "rgba(239,255,247,.72)";
-    //   helper.textContent = "Uses Open-Meteo geocoding, then fetches current conditions. Output stays inside this panel.";
-      card.appendChild(helper);
 
       mount(card);
     }
@@ -834,10 +923,9 @@
           const head = document.createElement("div");
           head.innerHTML =
             `<div style="font-size:22px;font-weight:950;letter-spacing:-.3px">${escapeHTML(entry.word || word)}</div>` +
-            (phon ? `<div style="color:${"rgba(239,255,247,.72)"};font-weight:850;font-size:13px;margin-top:4px">${escapeHTML(phon)}</div>` : "");
+            (phon ? `<div style="color:rgba(239,255,247,.72);font-weight:850;font-size:13px;margin-top:4px">${escapeHTML(phon)}</div>` : "");
           out.appendChild(head);
 
-          // up to 2 definitions
           let defs = [];
           for (const m of meanings){
             for (const d of (m.definitions || [])){
@@ -855,7 +943,7 @@
             box.style.borderRadius = "14px";
             box.style.padding = "12px";
             box.innerHTML =
-              `<div style="color:${"rgba(239,255,247,.72)"};font-size:12px;font-weight:900">${escapeHTML(d.pos || "—")}</div>` +
+              `<div style="color:rgba(239,255,247,.72);font-size:12px;font-weight:900">${escapeHTML(d.pos || "—")}</div>` +
               `<div style="margin-top:6px;font-size:14px;line-height:1.45;color:rgba(239,255,247,.88)">${escapeHTML(d.def || "")}</div>`;
             out.appendChild(box);
           });
@@ -871,13 +959,6 @@
 
       row.append(input, go);
       card.appendChild(row);
-
-      const helper = document.createElement("p");
-      helper.className = "text clamp3";
-      helper.style.textAlign = "center";
-      helper.style.color = "rgba(239,255,247,.72)";
-    //   helper.textContent = "Shows up to 2 definitions to keep the panel clean (no scrolling).";
-      card.appendChild(helper);
 
       mount(card);
     }
