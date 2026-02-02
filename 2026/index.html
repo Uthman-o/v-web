@@ -529,15 +529,27 @@
     scanner.addEventListener('mouseenter', startScan);
     scanner.addEventListener('mouseleave', pauseScan);
 
-    // Mobile: touch & hold
+    // Mobile: touch & hold (do NOT block taps on Continue)
     let holdTimer = null;
+
     scanner.addEventListener('touchstart', (e) => {
       if (!armed) return;
+
+      // If user touched the Continue link (or any interactive element), let it work normally.
+      const interactive = e.target.closest('#continueBtn, a, button, input, textarea, select, label');
+      if (interactive) return;
+
+      // Only preventDefault for scanner-hold gesture
       e.preventDefault();
-      holdTimer = setTimeout(() => startScan(), 120); // slight hold feels intentional
+
+      holdTimer = setTimeout(() => startScan(), 120);
     }, { passive:false });
 
-    scanner.addEventListener('touchend', () => {
+    scanner.addEventListener('touchend', (e) => {
+      // If user ended touch on Continue (or interactive), don't interfere.
+      const interactive = e.target.closest('#continueBtn, a, button, input, textarea, select, label');
+      if (interactive) return;
+
       if (holdTimer){ clearTimeout(holdTimer); holdTimer = null; }
       pauseScan();
     });
@@ -546,6 +558,13 @@
       if (holdTimer){ clearTimeout(holdTimer); holdTimer = null; }
       pauseScan();
     });
+
+    continueBtn.addEventListener('click', (e) => {
+      // If anything weird blocks navigation on some mobile browsers, force it.
+      e.preventDefault();
+      window.location.href = continueBtn.getAttribute('href');
+    });
+
 
     // Easter egg: invisible corner target instantly unlocks
     ghost.addEventListener('click', () => {
