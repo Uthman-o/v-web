@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>I got carried away</title>
+  <style>
+    :root{
+      --bg0:#02110B; --bg1:#052217;
+      --emerald:#1FD18C; --emerald2:#0EA572;
+      --text:#EFFFF7; --muted:rgba(239,255,247,.72);
+      --border: rgba(239,255,247,.14);
+      --card: rgba(255,255,255,.08);
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--text);
+      background:
+        radial-gradient(900px 600px at 70% 25%, rgba(31,209,140,.22), transparent 60%),
+        radial-gradient(700px 520px at 25% 75%, rgba(14,165,114,.18), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow:hidden; /* no scrollbars */
+    }
+
+    .app{
+      height:100%;
+      display:grid;
+      grid-template-columns: 300px 1fr;
+    }
+
+    /* LEFT NAV */
+    aside{
+      padding: 22px 16px;
+      border-right: 1px solid rgba(239,255,247,.10);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+      overflow:hidden; /* no scrolling */
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+    .brand{
+      padding: 4px 6px 2px;
+    }
+    .brand h1{
+      margin:0;
+      font-size: 20px;
+      font-weight: 950;
+      letter-spacing:-.4px;
+    }
+    .brand p{
+      margin:6px 0 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height:1.35;
+    }
+
+    .nav{
+      flex: 1 1 auto;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start; /* top to bottom */
+      gap: 12px; /* spaced out */
+      padding: 6px 2px;
+    }
+    .navbtn{
+      width:100%;
+      text-align:left;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 13px 12px;
+      border-radius: 16px;
+      cursor:pointer;
+      font-weight: 950;
+      letter-spacing:.1px;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .navbtn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(31,209,140,.45);
+      background: rgba(31,209,140,.10);
+    }
+    .navbtn:active{ transform: translateY(0); }
+    .navbtn.active{
+      border-color: rgba(31,209,140,.70);
+      background: rgba(31,209,140,.14);
+      box-shadow: 0 0 0 2px rgba(31,209,140,.10) inset;
+    }
+    .navmeta{
+      font-size: 11.5px;
+      color: rgba(239,255,247,.70);
+      font-weight: 800;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: var(--emerald);
+      box-shadow: 0 0 18px rgba(31,209,140,.35);
+      flex:0 0 auto;
+    }
+
+    .foot{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding: 2px;
+    }
+    .cont{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--emerald), rgba(239,255,247,.88));
+      color:#02110B;
+      font-weight: 950;
+      text-decoration:none;
+      border:0;
+      box-shadow: 0 14px 34px rgba(31,209,140,.18);
+    }
+    .hint{
+      color: rgba(239,255,247,.62);
+      font-size: 12px;
+      line-height:1.35;
+    }
+
+    /* RIGHT PANEL */
+    main{
+      padding: 22px;
+      overflow:hidden; /* no scrollbars */
+      display:flex;
+      align-items:stretch;
+      justify-content:stretch;
+    }
+    .panel{
+      width:100%;
+      height:100%;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .panelHead{
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid rgba(239,255,247,.10);
+      background: rgba(0,0,0,.14);
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+    }
+    .panelTitle{
+      margin:0;
+      font-size: 16px;
+      font-weight: 950;
+      letter-spacing:-.2px;
+    }
+    .panelSub{
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12.5px;
+      font-weight: 800;
+    }
+    .status{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      color: rgba(239,255,247,.70);
+      font-size: 12px;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    /* Content area: no scrolling */
+    .panelBody{
+      flex: 1 1 auto;
+      padding: 16px;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center; /* centralize for non-image UIs */
+    }
+    .panelBody.stretch{
+        align-items: stretch;
+        justify-content: stretch;
+    }
+
+    /* Content cards */
+    .card{
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(239,255,247,.12);
+      background: rgba(0,0,0,.20);
+      border-radius: 18px;
+      padding: 14px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+
+    /* APOD: header / media / explanation / buttons - no overlap */
+        .apodCard{
+        height: 100%;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto auto;
+        gap: 12px;
+        }
+
+        /* Ensure the media box can actually shrink inside the grid */
+        .apodCard .mediaBox{
+        min-height: 0;          /* IMPORTANT: enables minmax(0,1fr) to work properly */
+        }
+
+        /* Full image visible (no cropping) */
+        .apodCard .mediaBox img{
+        width: 100%;
+        height: 100%;
+        object-fit: contain;    /* shrink to fit */
+        }
+
+        /* Show full explanation: scroll only inside explanation if it’s long */
+        .apodExpl{
+        max-height: 34vh;
+        overflow: auto;
+        padding-right: 6px;
+        }
+
+
+    /* Image/video area: SHRINK to fit, never crop */
+    .mediaBox{
+      width:100%;
+      flex: 1 1 auto;               /* uses remaining space */
+      min-height: 180px;
+      border: 1px solid rgba(239,255,247,.10);
+      border-radius: 16px;
+      background: rgba(0,0,0,.35);
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+    }
+    .mediaBox img{
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain; /* key: shrink, don't crop */
+      display:block;
+    }
+    .mediaBox iframe{
+      width:100%;
+      height:100%;
+      border:0;
+    }
+
+    .text{
+      margin:0;
+      color: rgba(239,255,247,.84);
+      font-size: 13.5px;
+      line-height: 1.45;
+      display:-webkit-box;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+    .clamp3{ -webkit-line-clamp: 3; }
+    .clamp6{ -webkit-line-clamp: 6; }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center; /* centered for non-image UI */
+    }
+    .btn{
+      border: 1px solid rgba(239,255,247,.16);
+      background: rgba(255,255,255,.06);
+      color: rgba(239,255,247,.92);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 950;
+      font-size: 13px;
+      user-select:none;
+      transition: transform .10s ease, border-color .12s ease, background .12s ease;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(31,209,140,.35);
+      background: rgba(31,209,140,.10);
+    }
+    .btn:active{ transform: translateY(0); }
+    .btn.primary{
+      border:0;
+      background: linear-gradient(135deg, var(--emerald), rgba(239,255,247,.88));
+      color:#02110B;
+      box-shadow: 0 14px 34px rgba(31,209,140,.16);
+    }
+
+    input{
+      width: min(460px, 100%);
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(239,255,247,.16);
+      background: rgba(0,0,0,.24);
+      color: rgba(239,255,247,.92);
+      outline:none;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    /* Trivia */
+    .q{
+      font-weight: 950;
+      font-size: 16px;
+      margin: 0;
+      text-align:center;
+    }
+    .choices{
+      display:grid;
+      gap: 10px;
+      width: min(720px, 100%);
+      margin: 0 auto;
+    }
+    .choice{
+      width:100%;
+      text-align:left;
+      border: 1px solid rgba(239,255,247,.14);
+      background: rgba(255,255,255,.05);
+      color: rgba(239,255,247,.92);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 900;
+      font-size: 13px;
+      transition: transform .08s ease, background .12s ease, border-color .12s ease;
+    }
+    .choice:hover{ transform: translateY(-1px); border-color: rgba(239,255,247,.22); background: rgba(255,255,255,.08); }
+    .choice:active{ transform: translateY(0); }
+    .choice.correct{ border-color: rgba(31,209,140,.55); background: rgba(31,209,140,.14); }
+    .choice.wrong{ border-color: rgba(255,142,142,.45); background: rgba(255,142,142,.10); }
+    .card.scrollOK{ overflow:auto;}
+    .navbtn:disabled{
+        opacity:.6;
+        cursor:not-allowed;}
+
+
+    /* Fade-in */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); filter: blur(6px); }
+      to   { opacity: 1; transform: translateY(0);  filter: blur(0); }
+    }
+    .fade{ opacity:0; animation: fadeUp .55s cubic-bezier(.2,.9,.2,1) forwards; }
+    .d1{ animation-delay:.03s } .d2{ animation-delay:.12s } .d3{ animation-delay:.22s }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <h1>I got carried away</h1>
+        <!-- <p>Choose an API on the left. Output fills the right side. Images shrink to fit (no cropping).</p> -->
+      </div>
+
+      <div class="nav" id="nav">
+        <button class="navbtn" data-key="nasa" type="button">
+          <span><span class="dot"></span> NASA APOD<br><span class="navmeta">Photo/Video of the day</span></span>
+          <span class="navmeta">→</span>
+        </button>
+
+        <button class="navbtn" data-key="meteo" type="button">
+          <span><span class="dot"></span> Weather<br><span class="navmeta">Powered by open-meteo</span></span>
+          <span class="navmeta">→</span>
+        </button>
+
+        <button class="navbtn" data-key="trivia" type="button">
+          <span><span class="dot"></span> Open Trivia<br><span class="navmeta">1 question</span></span>
+          <span class="navmeta">→</span>
+        </button>
+
+        <button class="navbtn" data-key="facts" type="button">
+          <span><span class="dot"></span> Fun Facts<br><span class="navmeta">Random fact</span></span>
+          <span class="navmeta">→</span>
+        </button>
+
+        <button class="navbtn" data-key="foodish" type="button">
+          <span><span class="dot"></span> Foodish<br><span class="navmeta">Random food image</span></span>
+          <span class="navmeta">→</span>
+        </button>
+
+        <button class="navbtn" data-key="dict" type="button">
+          <span><span class="dot"></span> Free Dictionary<br><span class="navmeta">Word lookup</span></span>
+          <span class="navmeta">→</span>
+        </button>
+      </div>
+
+      <div class="foot">
+        <a class="cont" href="./ask.html">Leave</a>
+        <!-- <div class="hint">Change Continue’s href to your next page.</div> -->
+      </div>
+    </aside>
+
+    <main>
+      <section class="panel">
+        <div class="panelHead">
+          <div>
+            <div class="panelTitle" id="panelTitle">NASA APOD</div>
+            <div class="panelSub" id="panelSub">Astronomy Picture of the Day</div>
+          </div>
+          <div class="status" id="status">Idle</div>
+        </div>
+
+        <div class="panelBody" id="panelBody">
+          <!-- Dynamic -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ============================
+    // CONFIG
+    // ============================
+    // Replace with your NASA key:
+    const NASA_KEY = "hXa5FOiGgl2VdZIRtuUHSbIgcI8ChaeEBGRPLWfW";
+
+    const panelTitle = document.getElementById("panelTitle");
+    const panelSub   = document.getElementById("panelSub");
+    const statusEl   = document.getElementById("status");
+    const panelBody  = document.getElementById("panelBody");
+    const navBtns    = [...document.querySelectorAll(".navbtn")];
+
+    function setStatus(t){ statusEl.textContent = t; }
+
+    function escapeHTML(s){
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    // OpenTrivia returns HTML entities
+    function decodeEntities(str){
+      const txt = document.createElement("textarea");
+      txt.innerHTML = str;
+      return txt.value;
+    }
+
+    async function fetchJSON(url){
+      const res = await fetch(url, { cache: "no-store" });
+      const ct = (res.headers.get("content-type") || "").toLowerCase();
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!ct.includes("application/json")) throw new Error("Expected JSON");
+      return res.json();
+    }
+
+    function mount(node){
+      panelBody.innerHTML = "";
+      panelBody.appendChild(node);
+    }
+
+    function makeCard(){
+      const card = document.createElement("div");
+      card.className = "card fade d1";
+      return card;
+    }
+
+    function makeBtn(label, primary, onClick){
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn" + (primary ? " primary" : "");
+      b.textContent = label;
+      b.onclick = onClick;
+      return b;
+    }
+
+    // ============================
+    // VIEWS
+    // ============================
+    async function viewNASA(){
+    panelTitle.textContent = "NASA APOD";
+    panelSub.textContent = "Astronomy Picture of the Day";
+    setStatus("Loading…");
+
+    // Stretch the right panel for media layout
+    panelBody.classList.add("stretch");
+
+    // One-call-per-click: disable nav button during fetch
+    const nasaBtn = document.querySelector('.navbtn[data-key="nasa"]');
+    nasaBtn.disabled = true;
+
+    try{
+        const apod = await fetchJSON(
+        `https://api.nasa.gov/planetary/apod?api_key=${encodeURIComponent(NASA_KEY)}`
+        );
+
+        const card = makeCard();
+        card.classList.add("apodCard");
+
+        // Header (no clamping)
+        const header = document.createElement("p");
+        header.className = "text fade d2";
+        header.innerHTML = `<b>${escapeHTML(apod.title || "")}</b> • ${escapeHTML(apod.date || "")}`;
+        card.appendChild(header);
+
+        // Media (fills remaining space, never covers text)
+        const mediaBox = document.createElement("div");
+        mediaBox.className = "mediaBox fade d2";
+
+        if (apod.media_type === "image") {
+        const img = document.createElement("img");
+        img.alt = apod.title || "APOD";
+        img.src = apod.hdurl || apod.url;
+
+        img.style.opacity = "0";
+        img.onload = () => { img.style.transition = "opacity .55s ease"; img.style.opacity = "1"; };
+
+        mediaBox.appendChild(img);
+        } else if (apod.media_type === "video") {
+        const iframe = document.createElement("iframe");
+        iframe.className = "media";
+        iframe.src = apod.url;
+        iframe.allowFullscreen = true;
+        mediaBox.appendChild(iframe);
+        } else {
+        mediaBox.textContent = "Unsupported media type.";
+        }
+
+        card.appendChild(mediaBox);
+
+        // Explanation (full text; scrolls inside its own area if long)
+        const expl = document.createElement("p");
+        expl.className = "text fade d3 apodExpl";
+        expl.textContent = apod.explanation || "";
+        card.appendChild(expl);
+
+        // Buttons
+        const row = document.createElement("div");
+        row.className = "row fade d3";
+        row.append(
+        makeBtn("Reload", true, () => select("nasa")),
+        (() => {
+            const a = document.createElement("a");
+            a.className = "btn";
+            a.href = apod.url || "#";
+            a.target = "_blank";
+            a.rel = "noreferrer";
+            a.textContent = "Open media";
+            return a;
+        })()
+        );
+        card.appendChild(row);
+
+        mount(card);
+        setStatus("OK");
+    } catch(e){
+        setStatus("Error");
+        const card = makeCard();
+        const p = document.createElement("p");
+        p.className = "text";
+        p.innerHTML = `<b>Error:</b> ${escapeHTML(String(e.message || e))}`;
+        card.appendChild(p);
+        mount(card);
+    } finally {
+        nasaBtn.disabled = false;
+    }
+    }
+
+
+    async function viewMeteo(){
+      panelTitle.textContent = "Weather";
+      panelSub.textContent = "Search a city";
+      setStatus("Ready");
+
+      const card = makeCard();
+
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const input = document.createElement("input");
+      input.placeholder = "City (e.g., Pittsburgh, Atlanta, Morgantown)…";
+      input.value = "Atlanta";
+
+      const go = makeBtn("Search", true, async () => {
+        const q = (input.value || "").trim();
+        if (!q) return;
+
+        setStatus("Searching…");
+        try{
+          const geo = await fetchJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&language=en&format=json`);
+          const hit = geo?.results?.[0];
+          if (!hit) throw new Error("No results");
+
+          setStatus("Loading…");
+          const wx = await fetchJSON(
+             `https://api.open-meteo.com/v1/forecast?latitude=${hit.latitude}&longitude=${hit.longitude}` +
+            `&current=temperature_2m,apparent_temperature,relative_humidity_2m,uv_index,wind_speed_10m` +
+            `&temperature_unit=fahrenheit&windspeed_unit=mph`
+          );
+
+          const cur = wx.current || {};
+          const feelsLike = cur.apparent_temperature;
+            const humidity  = cur.relative_humidity_2m;
+            const uv        = cur.uv_index;
+
+          const name = [hit.name, hit.admin1, hit.country].filter(Boolean).join(", ");
+
+          // Replace / create results block in card
+          let res = card.querySelector("[data-role='wx']");
+          if (!res){
+            res = document.createElement("div");
+            res.dataset.role = "wx";
+            res.style.display = "grid";
+            res.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+            res.style.gap = "12px";
+            card.appendChild(res);
+          }
+          res.innerHTML = "";
+
+          const tile = (k, v) => {
+            const d = document.createElement("div");
+            d.style.border = "1px solid rgba(239,255,247,.12)";
+            d.style.background = "rgba(255,255,255,.04)";
+            d.style.borderRadius = "14px";
+            d.style.padding = "12px";
+            d.innerHTML =
+              `<div style="color:${"rgba(239,255,247,.72)"};font-size:12px;font-weight:900">${escapeHTML(k)}</div>` +
+              `<div style="margin-top:6px;font-size:16px;font-weight:950;letter-spacing:-.2px">${escapeHTML(v)}</div>`;
+            return d;
+          };
+
+            res.append(
+                tile("Location", name || "—"),
+                tile("Updated", cur.time || "—"),
+
+                tile("Temperature", (cur.temperature_2m ?? "—") + " °F"),
+                tile("Feels Like", (feelsLike ?? "—") + " °F"),
+
+                tile("Humidity", (humidity ?? "—") + " %"),
+                tile("UV Index", (uv ?? "—")),
+
+                tile("Wind", (cur.wind_speed_10m ?? "—") + " mph")
+                );
+
+
+          setStatus("OK");
+        } catch(e){
+          setStatus("Error");
+        }
+      });
+
+      input.addEventListener("keydown", (e)=>{ if(e.key === "Enter") go.click(); });
+
+      row.append(input, go);
+      card.appendChild(row);
+
+      const helper = document.createElement("p");
+      helper.className = "text clamp3";
+      helper.style.color = "rgba(239,255,247,.72)";
+    //   helper.textContent = "Uses Open-Meteo geocoding, then fetches current conditions. Output stays inside this panel.";
+      card.appendChild(helper);
+
+      mount(card);
+    }
+
+    async function viewTrivia(){
+      panelTitle.textContent = "Open Trivia";
+      panelSub.textContent = "Answer one multiple-choice question";
+      setStatus("Loading…");
+
+      const data = await fetchJSON("https://opentdb.com/api.php?amount=1&type=multiple");
+      const q0 = data?.results?.[0];
+      if (!q0) throw new Error("No question");
+
+      const category = decodeEntities(q0.category || "");
+      const difficulty = decodeEntities(q0.difficulty || "");
+      const question = decodeEntities(q0.question || "");
+      const correct = decodeEntities(q0.correct_answer || "");
+      const incorrect = (q0.incorrect_answers || []).map(decodeEntities);
+      const choices = [correct, ...incorrect].sort(() => Math.random() - 0.5);
+
+      const card = makeCard();
+
+      const meta = document.createElement("p");
+      meta.className = "text clamp3 fade d2";
+      meta.innerHTML = `<b>${escapeHTML(category)}</b> • ${escapeHTML(difficulty)}`;
+      card.appendChild(meta);
+
+      const q = document.createElement("div");
+      q.className = "q fade d2";
+      q.textContent = question;
+      card.appendChild(q);
+
+      const feedback = document.createElement("p");
+      feedback.className = "text clamp3";
+      feedback.style.textAlign = "center";
+      feedback.style.color = "rgba(239,255,247,.72)";
+
+      const choicesWrap = document.createElement("div");
+      choicesWrap.className = "choices fade d3";
+
+      function lock(){
+        [...choicesWrap.querySelectorAll(".choice")].forEach(b => b.disabled = true);
+      }
+
+      choices.forEach(ans => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "choice";
+        b.textContent = ans;
+        b.onclick = () => {
+          lock();
+          if (ans === correct){
+            b.classList.add("correct");
+            feedback.innerHTML = `<span style="color:rgba(31,209,140,.95);font-weight:950">Correct.</span>`;
+          } else {
+            b.classList.add("wrong");
+            [...choicesWrap.querySelectorAll(".choice")].forEach(bb => {
+              if (bb.textContent === correct) bb.classList.add("correct");
+            });
+            feedback.innerHTML =
+              `<span style="color:rgba(255,142,142,.95);font-weight:950">Wrong.</span> Correct: <b>${escapeHTML(correct)}</b>`;
+          }
+        };
+        choicesWrap.appendChild(b);
+      });
+
+      card.appendChild(choicesWrap);
+      card.appendChild(feedback);
+
+      const row = document.createElement("div");
+      row.className = "row fade d3";
+      row.append(makeBtn("Next question", true, () => select("trivia")));
+      card.appendChild(row);
+
+      mount(card);
+      setStatus("OK");
+    }
+
+    async function viewFacts(){
+      panelTitle.textContent = "Fun Facts";
+      panelSub.textContent = "Random useless fact";
+      setStatus("Loading…");
+
+      const data = await fetchJSON("https://uselessfacts.jsph.pl/random.json?language=en");
+
+      const card = makeCard();
+
+      const fact = document.createElement("p");
+      fact.className = "text clamp6 fade d2";
+      fact.style.textAlign = "center";
+      fact.textContent = data?.text || "";
+      card.appendChild(fact);
+
+      const row = document.createElement("div");
+      row.className = "row fade d3";
+      row.append(makeBtn("Another fact", true, () => select("facts")));
+      card.appendChild(row);
+
+      mount(card);
+      setStatus("OK");
+    }
+
+    async function viewFoodish(){
+      panelTitle.textContent = "Foodish";
+      panelSub.textContent = "Random food image (shrinks to fit)";
+      setStatus("Loading…");
+
+      const data = await fetchJSON("https://foodish-api.com/api/");
+      const url = data?.image;
+
+      const card = makeCard();
+
+      const mediaBox = document.createElement("div");
+      mediaBox.className = "mediaBox fade d2";
+      const img = document.createElement("img");
+      img.alt = "Foodish";
+      img.src = url || "";
+      img.style.opacity = "0";
+      img.onload = () => { img.style.transition = "opacity .55s ease"; img.style.opacity = "1"; };
+      mediaBox.appendChild(img);
+      card.appendChild(mediaBox);
+
+      const row = document.createElement("div");
+      row.className = "row fade d3";
+      row.append(makeBtn("Another dish", true, () => select("foodish")));
+      card.appendChild(row);
+
+      mount(card);
+      setStatus("OK");
+    }
+
+    async function viewDict(){
+      panelTitle.textContent = "Free Dictionary";
+      panelSub.textContent = "Look up a word (compact, centered)";
+      setStatus("Ready");
+
+      const card = makeCard();
+
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const input = document.createElement("input");
+      input.placeholder = "Word (e.g., love, adore, valentine)…";
+      input.value = "love";
+
+      const go = makeBtn("Search", true, async () => {
+        const word = (input.value || "").trim();
+        if (!word) return;
+
+        setStatus("Loading…");
+        try{
+          const data = await fetchJSON(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+          const entry = data?.[0] || {};
+          const phon = entry.phonetic || entry?.phonetics?.find(p=>p.text)?.text || "";
+          const meanings = entry.meanings || [];
+
+          const res = card.querySelector("[data-role='dict']");
+          if (res) res.remove();
+
+          const out = document.createElement("div");
+          out.dataset.role = "dict";
+          out.style.display = "flex";
+          out.style.flexDirection = "column";
+          out.style.gap = "10px";
+          out.style.alignItems = "center";
+          out.style.justifyContent = "center";
+          out.style.textAlign = "center";
+          out.style.flex = "1 1 auto";
+
+          const head = document.createElement("div");
+          head.innerHTML =
+            `<div style="font-size:22px;font-weight:950;letter-spacing:-.3px">${escapeHTML(entry.word || word)}</div>` +
+            (phon ? `<div style="color:${"rgba(239,255,247,.72)"};font-weight:850;font-size:13px;margin-top:4px">${escapeHTML(phon)}</div>` : "");
+          out.appendChild(head);
+
+          // up to 2 definitions
+          let defs = [];
+          for (const m of meanings){
+            for (const d of (m.definitions || [])){
+              defs.push({ pos: m.partOfSpeech, def: d.definition });
+              if (defs.length >= 2) break;
+            }
+            if (defs.length >= 2) break;
+          }
+
+          defs.forEach(d => {
+            const box = document.createElement("div");
+            box.style.width = "min(740px, 100%)";
+            box.style.border = "1px solid rgba(239,255,247,.12)";
+            box.style.background = "rgba(255,255,255,.04)";
+            box.style.borderRadius = "14px";
+            box.style.padding = "12px";
+            box.innerHTML =
+              `<div style="color:${"rgba(239,255,247,.72)"};font-size:12px;font-weight:900">${escapeHTML(d.pos || "—")}</div>` +
+              `<div style="margin-top:6px;font-size:14px;line-height:1.45;color:rgba(239,255,247,.88)">${escapeHTML(d.def || "")}</div>`;
+            out.appendChild(box);
+          });
+
+          card.appendChild(out);
+          setStatus("OK");
+        } catch(e){
+          setStatus("Error");
+        }
+      });
+
+      input.addEventListener("keydown", (e)=>{ if(e.key === "Enter") go.click(); });
+
+      row.append(input, go);
+      card.appendChild(row);
+
+      const helper = document.createElement("p");
+      helper.className = "text clamp3";
+      helper.style.textAlign = "center";
+      helper.style.color = "rgba(239,255,247,.72)";
+    //   helper.textContent = "Shows up to 2 definitions to keep the panel clean (no scrolling).";
+      card.appendChild(helper);
+
+      mount(card);
+    }
+
+    const VIEWS = {
+      nasa: viewNASA,
+      meteo: viewMeteo,
+      trivia: viewTrivia,
+      facts: viewFacts,
+      foodish: viewFoodish,
+      dict: viewDict
+    };
+
+    function setActive(key){
+      navBtns.forEach(b => b.classList.toggle("active", b.dataset.key === key));
+    }
+
+    async function select(key){
+      setActive(key);
+      panelBody.classList.remove("stretch");
+      try{
+        await VIEWS[key]();
+      } catch(e){
+        setStatus("Error");
+        const card = makeCard();
+        const p = document.createElement("p");
+        p.className = "text clamp6";
+        p.innerHTML = `<b>Error:</b> ${escapeHTML(String(e.message || e))}`;
+        card.appendChild(p);
+        mount(card);
+      }
+    }
+
+    navBtns.forEach(b => b.addEventListener("click", () => select(b.dataset.key)));
+
+    // default
+    select("nasa");
+  </script>
+</body>
+</html>
