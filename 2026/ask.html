@@ -161,7 +161,7 @@
       </div>
 
       <div class="middle">
-        <div>
+        <div> id="matchBlock" class="hidden">
           <p class="label">Match Found</p>
           <h1 class="name" id="herName">Dulcinea</h1>
           <div class="meta">Confidence level: <span>dangerously high</span></div>
@@ -325,6 +325,8 @@
         { el: t3, text: "Scanning candidates ... 404 (everyone else)" },
         { el: t4, text: "✔ 1 result found. Rendering..." }
       ];
+      const matchBlock = document.getElementById('matchBlock');
+
 
       function typeLine(el, text, speed=16){
         el.textContent = "";
@@ -343,7 +345,9 @@
           await typeLine(L.el, L.text, 16);
           await new Promise(r=>setTimeout(r, 280));
         }
+        matchBlock.classList.remove('hidden');
       })();
+
 
       // button humor
       const yesBtn = document.getElementById('yesBtn');
